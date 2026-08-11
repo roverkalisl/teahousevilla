@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 
-from .models import Facility, Media, Property, Room
+from .models import Attraction, Facility, Media, Property, Room, Testimonial
 
 
 def _get_property():
@@ -14,8 +14,11 @@ def home(request):
         "rooms": Room.objects.filter(active=True)[:3] if site else [],
         "facilities": Facility.objects.filter(active=True)[:8],
         "gallery_preview": Media.objects.filter(active=True, media_type=Media.IMAGE)[:8],
+        "hero_slides": Media.objects.filter(active=True, media_type=Media.IMAGE, room__isnull=True)[:6],
         "featured_video": Media.objects.filter(active=True, media_type=Media.VIDEO).first(),
         "starting_price": site.get_starting_price() if site else None,
+        "attractions": Attraction.objects.filter(active=True)[:6],
+        "testimonials": Testimonial.objects.filter(active=True)[:6],
     }
     return render(request, "property/home.html", context)
 
@@ -25,6 +28,7 @@ def about(request):
     context = {
         "property": site,
         "facilities": Facility.objects.filter(active=True),
+        "attractions": Attraction.objects.filter(active=True),
     }
     return render(request, "property/about.html", context)
 

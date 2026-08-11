@@ -8,3 +8,4 @@ staticfiles/
 .vscode/
 *.log
 .claude/
+node_modules/

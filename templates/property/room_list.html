@@ -5,30 +5,28 @@
 
 {% block content %}
 <section class="section">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Accommodation</div>
-      <h1 class="section-title display-font">Rooms &amp; Suites</h1>
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Accommodation</p>
+      <h1 class="mt-2 text-4xl font-bold text-forest md:text-5xl">Rooms &amp; Suites</h1>
     </div>
 
     {% if rooms %}
-    <div class="row g-4">
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {% for room in rooms %}
-      <div class="col-md-6 col-lg-4">
-        <div class="villa-card">
-          {% if room.cover_image %}<img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}">{% else %}<img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}">{% endif %}
-          <div class="card-body">
-            <h5>{{ room.name }}</h5>
-            <p class="text-muted small mb-2">{{ room.bed_type }} &middot; Sleeps {{ room.capacity }}{% if room.has_ac %} &middot; AC{% endif %}</p>
-            <p class="mb-3">{{ room.description|truncatewords:20 }}</p>
-            <a href="{{ room.get_absolute_url }}" class="btn btn-sm btn-villa-primary">View Room</a>
-          </div>
+      <div class="card">
+        {% if room.cover_image %}<img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}" class="h-56 w-full object-cover">{% else %}<img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}" class="h-56 w-full object-cover">{% endif %}
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-forest">{{ room.name }}</h2>
+          <p class="mt-1 text-sm text-ink/60">{{ room.bed_type }} &middot; Sleeps {{ room.capacity }}{% if room.has_ac %} &middot; AC{% endif %}</p>
+          <p class="mt-3 text-sm text-ink/70">{{ room.description|truncatewords:20 }}</p>
+          <a href="{{ room.get_absolute_url }}" class="btn-outline-dark mt-4">View Room</a>
         </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-center text-muted">Room details coming soon. Please contact us for availability.</p>
+    <p class="text-center text-ink/60">Room details coming soon. Please contact us for availability.</p>
     {% endif %}
   </div>
 </section>

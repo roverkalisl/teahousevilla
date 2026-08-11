@@ -6,6 +6,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 
+from .utils import to_embed_url
+
 MAX_IMAGE_DIMENSION = 1920
 
 
@@ -45,6 +47,9 @@ class Property(models.Model):
     youtube_url = models.URLField(blank=True)
 
     hero_image = models.ImageField(upload_to="hero/", blank=True, null=True)
+    hero_video_url = models.URLField(
+        blank=True, help_text="Optional YouTube/Vimeo URL for an ambient video hero background. If blank, the hero shows an auto-sliding photo gallery instead."
+    )
     starting_price_override = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -70,6 +75,10 @@ class Property(models.Model):
     def whatsapp_link(self):
         digits = re.sub(r"\D", "", self.whatsapp_number or "")
         return f"https://wa.me/{digits}" if digits else ""
+
+    @property
+    def hero_video_embed_url(self):
+        return to_embed_url(self.hero_video_url) if self.hero_video_url else ""
 
 
 class Facility(models.Model):
@@ -183,14 +192,7 @@ class Media(models.Model):
 
     @property
     def video_embed_url(self):
-        url = self.video_url or ""
-        youtube_match = re.search(r"(?:youtu\.be/|youtube\.com/watch\?v=|youtube\.com/embed/)([\w-]+)", url)
-        if youtube_match:
-            return f"https://www.youtube-nocookie.com/embed/{youtube_match.group(1)}"
-        vimeo_match = re.search(r"vimeo\.com/(\d+)", url)
-        if vimeo_match:
-            return f"https://player.vimeo.com/video/{vimeo_match.group(1)}"
-        return url
+        return to_embed_url(self.video_url)
 
 
 class Price(models.Model):
@@ -221,3 +223,76 @@ class Price(models.Model):
 
     def __str__(self):
         return f"{self.get_price_type_display()} — {self.amount}"
+
+
+class Attraction(models.Model):
+    BEACH = "beach"
+    RESTAURANT = "restaurant"
+    LANDMARK = "landmark"
+    ACTIVITY = "activity"
+    SHOPPING = "shopping"
+    OTHER = "other"
+    CATEGORY_CHOICES = [
+        (BEACH, "Beach"),
+        (RESTAURANT, "Restaurant"),
+        (LANDMARK, "Landmark"),
+        (ACTIVITY, "Activity"),
+        (SHOPPING, "Shopping"),
+        (OTHER, "Other"),
+    ]
+
+    villa = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="attractions")
+    name = models.CharField(max_length=150)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default=OTHER)
+    distance_text = models.CharField(max_length=50, help_text="e.g. '8 km' or '15 min drive'.")
+    description = models.CharField(max_length=255, blank=True)
+    image = models.ImageField(upload_to="attractions/", blank=True, null=True)
+    google_maps_url = models.URLField(blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.distance_text})"
+
+
+class Testimonial(models.Model):
+    GOOGLE = "google"
+    AIRBNB = "airbnb"
+    BOOKING_COM = "booking_com"
+    DIRECT = "direct"
+    OTHER = "other"
+    SOURCE_CHOICES = [
+        (GOOGLE, "Google Reviews"),
+        (AIRBNB, "Airbnb"),
+        (BOOKING_COM, "Booking.com"),
+        (DIRECT, "Direct Guest"),
+        (OTHER, "Other"),
+    ]
+    RATING_CHOICES = [(i, f"{i} Star{'s' if i != 1 else ''}") for i in range(1, 6)]
+
+    villa = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="testimonials")
+    guest_name = models.CharField(max_length=100)
+    rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES, default=5)
+    review_text = models.TextField()
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default=GOOGLE)
+    stay_date = models.DateField(null=True, blank=True)
+    guest_photo = models.ImageField(upload_to="testimonials/", blank=True, null=True)
+    display_order = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order", "-id"]
+
+    def __str__(self):
+        return f"{self.guest_name} — {self.rating}★"
+
+    @property
+    def filled_stars(self):
+        return range(self.rating)
+
+    @property
+    def empty_stars(self):
+        return range(5 - self.rating)

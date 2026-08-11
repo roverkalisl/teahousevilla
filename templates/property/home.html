@@ -4,116 +4,127 @@
 {% block meta_description %}{{ property.short_description }}{% endblock %}
 
 {% block content %}
-<section class="hero" style="background-image:url('{% if property.hero_image %}{{ property.hero_image.url }}{% else %}{% static 'img/hero-placeholder.jpg' %}{% endif %}');">
-  <div class="container hero-content py-5">
-    <div class="hero-eyebrow">{{ property.address|default:"Private Villa Retreat" }}</div>
-    <h1>{{ property.name|default:"Teahouse Villa" }}</h1>
-    <p class="lead col-lg-7">{{ property.short_description|default:"A serene private villa offering breathtaking views, personalised service and unforgettable stays." }}</p>
+<!-- Hero -->
+<section class="relative flex min-h-[92vh] items-center overflow-hidden text-white">
+  <div class="absolute inset-0">
+    {% if property.hero_video_embed_url %}
+    <iframe
+      class="pointer-events-none absolute left-1/2 top-1/2 h-[130%] w-[130%] -translate-x-1/2 -translate-y-1/2"
+      src="{{ property.hero_video_embed_url }}?autoplay=1&mute=1&loop=1&controls=0&playlist={{ property.hero_video_embed_url|slice:'-11:' }}"
+      allow="autoplay" title="{{ property.name }}"></iframe>
+    {% elif hero_slides %}
+      {% for slide in hero_slides %}
+      <div class="hero-slide{% if forloop.first %} is-active{% endif %}" style="background-image:url('{{ slide.image.url }}');"></div>
+      {% endfor %}
+    {% else %}
+      <div class="hero-slide is-active" style="background-image:url('{% if property.hero_image %}{{ property.hero_image.url }}{% else %}{% static 'img/hero-placeholder.jpg' %}{% endif %}');"></div>
+    {% endif %}
+    <div class="absolute inset-0 bg-gradient-to-b from-forest-dark/60 via-forest-dark/50 to-forest-dark/85"></div>
+  </div>
 
-    <div class="hero-facts">
-      {% if property.max_guests %}<div class="fact"><strong>{{ property.max_guests }}</strong><span>Guests</span></div>{% endif %}
-      {% if property.bedrooms %}<div class="fact"><strong>{{ property.bedrooms }}</strong><span>Bedrooms</span></div>{% endif %}
-      {% if property.bathrooms %}<div class="fact"><strong>{{ property.bathrooms }}</strong><span>Bathrooms</span></div>{% endif %}
-      {% if starting_price %}<div class="fact"><strong>Rs. {{ starting_price }}</strong><span>Starting / Night</span></div>{% endif %}
+  <div class="relative mx-auto max-w-7xl px-6 py-24 lg:px-8">
+    <p class="eyebrow">{{ property.address|default:"Private Villa Retreat" }}</p>
+    <h1 class="mt-3 max-w-3xl font-display text-4xl font-bold leading-tight md:text-6xl">{{ property.name|default:"Teahouse Villa" }}</h1>
+    <p class="mt-5 max-w-xl text-lg text-white/85">{{ property.short_description|default:"A serene private villa offering breathtaking views, personalised service and unforgettable stays." }}</p>
+
+    <div class="mt-10 flex flex-wrap gap-x-10 gap-y-4">
+      {% if property.max_guests %}<div><strong class="font-display text-2xl">{{ property.max_guests }}</strong><span class="block text-xs uppercase tracking-widest text-white/70">Guests</span></div>{% endif %}
+      {% if property.bedrooms %}<div><strong class="font-display text-2xl">{{ property.bedrooms }}</strong><span class="block text-xs uppercase tracking-widest text-white/70">Bedrooms</span></div>{% endif %}
+      {% if property.bathrooms %}<div><strong class="font-display text-2xl">{{ property.bathrooms }}</strong><span class="block text-xs uppercase tracking-widest text-white/70">Bathrooms</span></div>{% endif %}
+      {% if starting_price %}<div><strong class="font-display text-2xl">Rs. {{ starting_price }}</strong><span class="block text-xs uppercase tracking-widest text-white/70">Starting / Night</span></div>{% endif %}
     </div>
 
-    <div class="d-flex flex-wrap gap-3 mt-4">
-      <a href="{% url 'bookings:placeholder' %}" class="btn btn-villa-primary btn-lg">Check Availability</a>
-      <a href="{% url 'bookings:placeholder' %}" class="btn btn-villa-outline btn-lg">Book Now</a>
-      {% if property.whatsapp_link %}<a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn btn-villa-outline btn-lg"><i class="bi bi-whatsapp me-1"></i> WhatsApp Us</a>{% endif %}
+    <div class="mt-10 flex flex-wrap gap-4">
+      <a href="{% url 'bookings:inquire' %}" class="btn-primary">Check Availability</a>
+      {% if property.whatsapp_link %}<a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn-outline-light"><i class="bi bi-whatsapp"></i> WhatsApp Us</a>{% endif %}
     </div>
   </div>
 </section>
 
+<!-- Story -->
 <section class="section">
-  <div class="container">
-    <div class="row align-items-center gy-4">
-      <div class="col-lg-6">
-        <div class="section-eyebrow">Welcome</div>
-        <h2 class="section-title display-font">A Home Away From Home</h2>
-        <p>{{ property.full_description|default:"Nestled in a peaceful setting, this villa combines modern comfort with warm hospitality — the perfect base for a relaxing family getaway or a romantic escape." }}</p>
-        <a href="{% url 'property:about' %}" class="btn btn-villa-primary mt-2">Discover the Villa</a>
-      </div>
-      <div class="col-lg-6">
-        <div class="row g-3">
-          {% for facility in facilities|slice:":4" %}
-          <div class="col-6">
-            <div class="facility-pill">
-              <i class="bi {{ facility.icon }}"></i>
-              <span>{{ facility.name }}</span>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
+  <div class="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+    <div>
+      <p class="eyebrow">Our Story</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">A Home Away From Home</h2>
+      <p class="mt-5 leading-relaxed text-ink/75">{{ property.full_description|default:"Nestled in a peaceful setting, this villa combines modern comfort with warm hospitality — the perfect base for a relaxing family getaway or a romantic escape."|truncatewords:60 }}</p>
+      <a href="{% url 'property:about' %}" class="btn-outline-dark mt-6">Discover the Villa</a>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      {% for facility in facilities|slice:":4" %}
+      <div class="pill"><i class="bi {{ facility.icon }} text-lg text-gold"></i><span class="text-sm font-medium">{{ facility.name }}</span></div>
+      {% endfor %}
     </div>
   </div>
 </section>
 
 {% if rooms %}
 <section class="section section-alt">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Accommodation</div>
-      <h2 class="section-title display-font">Rooms &amp; Suites</h2>
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Accommodation</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Rooms &amp; Suites</h2>
     </div>
-    <div class="row g-4">
+    <div class="grid gap-8 md:grid-cols-3">
       {% for room in rooms %}
-      <div class="col-md-4">
-        <div class="villa-card">
-          {% if room.cover_image %}<img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}">{% else %}<img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}">{% endif %}
-          <div class="card-body">
-            <h5>{{ room.name }}</h5>
-            <p class="text-muted small mb-2">{{ room.bed_type }} &middot; Sleeps {{ room.capacity }}</p>
-            <a href="{{ room.get_absolute_url }}" class="btn btn-sm btn-villa-primary">View Room</a>
-          </div>
+      <a href="{{ room.get_absolute_url }}" class="card block">
+        {% if room.cover_image %}<img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}" class="h-56 w-full object-cover">{% else %}<img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}" class="h-56 w-full object-cover">{% endif %}
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-forest">{{ room.name }}</h3>
+          <p class="mt-1 text-sm text-ink/60">{{ room.bed_type }} &middot; Sleeps {{ room.capacity }}</p>
         </div>
-      </div>
+      </a>
       {% endfor %}
     </div>
-    <div class="text-center mt-4">
-      <a href="{% url 'property:room_list' %}" class="btn btn-villa-primary">View All Rooms</a>
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{% if facilities %}
-<section class="section">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Amenities</div>
-      <h2 class="section-title display-font">Facilities You'll Love</h2>
-    </div>
-    <div class="row g-3">
-      {% for facility in facilities %}
-      <div class="col-6 col-md-3">
-        <div class="facility-pill"><i class="bi {{ facility.icon }}"></i><span>{{ facility.name }}</span></div>
-      </div>
-      {% endfor %}
+    <div class="mt-10 text-center">
+      <a href="{% url 'property:room_list' %}" class="btn-outline-dark">View All Rooms</a>
     </div>
   </div>
 </section>
 {% endif %}
 
 {% if gallery_preview %}
-<section class="section section-alt">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Gallery</div>
-      <h2 class="section-title display-font">A Glimpse of the Villa</h2>
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Gallery</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">A Glimpse of the Villa</h2>
     </div>
-    <div class="row g-3 gallery-grid">
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
       {% for item in gallery_preview %}
-      <div class="col-6 col-md-3">
-        <div class="gallery-item ratio ratio-1x1">
-          <img src="{{ item.image.url }}" alt="{{ item.caption|default:property.name }}" class="w-100 h-100">
-        </div>
+      <div class="aspect-square overflow-hidden rounded-lg">
+        <img src="{{ item.image.url }}" alt="{{ item.caption|default:property.name }}" class="h-full w-full object-cover transition duration-300 hover:scale-105">
       </div>
       {% endfor %}
     </div>
-    <div class="text-center mt-4">
-      <a href="{% url 'property:gallery' %}" class="btn btn-villa-primary">View Full Gallery</a>
+    <div class="mt-10 text-center">
+      <a href="{% url 'property:gallery' %}" class="btn-outline-dark">View Full Gallery</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if attractions %}
+<section class="section section-alt">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Explore the Area</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Nearby Attractions</h2>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {% for spot in attractions %}
+      <div class="card">
+        {% if spot.image %}<img src="{{ spot.image.url }}" alt="{{ spot.name }}" class="h-40 w-full object-cover">{% endif %}
+        <div class="p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-forest">{{ spot.name }}</h3>
+            <span class="badge">{{ spot.distance_text }}</span>
+          </div>
+          <p class="mt-1 text-xs uppercase tracking-wide text-gold">{{ spot.get_category_display }}</p>
+          {% if spot.description %}<p class="mt-2 text-sm text-ink/70">{{ spot.description }}</p>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -121,67 +132,65 @@
 
 {% if featured_video %}
 <section class="section">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Video</div>
-      <h2 class="section-title display-font">Take a Video Tour</h2>
+  <div class="mx-auto max-w-4xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Video</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Take a Video Tour</h2>
     </div>
-    <div class="ratio ratio-16x9 mx-auto" style="max-width: 900px;">
-      <iframe src="{{ featured_video.video_embed_url }}" title="{{ featured_video.caption }}" allowfullscreen loading="lazy"></iframe>
+    <div class="aspect-video overflow-hidden rounded-lg shadow-lg">
+      <iframe class="h-full w-full" src="{{ featured_video.video_embed_url }}" title="{{ featured_video.caption }}" allowfullscreen loading="lazy"></iframe>
     </div>
   </div>
 </section>
 {% endif %}
 
+{% if testimonials %}
 <section class="section section-alt">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Testimonials</div>
-      <h2 class="section-title display-font">What Our Guests Say</h2>
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Guest Reviews</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">What Our Guests Say</h2>
     </div>
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="review-card">
-          <div class="stars mb-2">★★★★★</div>
-          <p>"An absolutely stunning property with impeccable service. We felt right at home from the moment we arrived."</p>
-          <p class="fw-semibold mb-0">— Priya S.</p>
+    <div class="grid gap-6 md:grid-cols-3">
+      {% for t in testimonials %}
+      <div class="card p-6">
+        <div class="text-gold">{% for _ in t.filled_stars %}★{% endfor %}{% for _ in t.empty_stars %}☆{% endfor %}</div>
+        <p class="mt-3 text-sm leading-relaxed text-ink/75">&ldquo;{{ t.review_text }}&rdquo;</p>
+        <div class="mt-4 flex items-center gap-3">
+          {% if t.guest_photo %}<img src="{{ t.guest_photo.url }}" alt="{{ t.guest_name }}" class="h-9 w-9 rounded-full object-cover">{% endif %}
+          <div>
+            <p class="text-sm font-semibold text-forest">{{ t.guest_name }}</p>
+            <p class="text-xs text-ink/50">{{ t.get_source_display }}</p>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="review-card">
-          <div class="stars mb-2">★★★★★</div>
-          <p>"The pool, the views, the hospitality — everything exceeded our expectations. Highly recommended!"</p>
-          <p class="fw-semibold mb-0">— James & Family</p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="review-card">
-          <div class="stars mb-2">★★★★★</div>
-          <p>"Booking directly with the villa was so easy, and the owner was incredibly responsive on WhatsApp."</p>
-          <p class="fw-semibold mb-0">— Nadia R.</p>
-        </div>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
+{% endif %}
 
 <section class="section">
-  <div class="container">
-    <div class="row gy-4 align-items-center">
-      <div class="col-lg-6">
-        <div class="section-eyebrow">Location</div>
-        <h2 class="section-title display-font">Find Us</h2>
-        <p>{{ property.address }}</p>
-        {% if property.google_maps_url %}<a href="{{ property.google_maps_url }}" target="_blank" rel="noopener" class="btn btn-villa-primary"><i class="bi bi-signpost-2 me-1"></i> Get Directions</a>{% endif %}
-      </div>
-      <div class="col-lg-6">
-        {% if property.google_maps_embed_url %}
-        <div class="ratio ratio-4x3 map-embed">
-          <iframe src="{{ property.google_maps_embed_url }}" allowfullscreen loading="lazy" title="Villa location"></iframe>
-        </div>
-        {% endif %}
-      </div>
+  <div class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+    <div>
+      <p class="eyebrow">Location</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Find Us</h2>
+      <p class="mt-3 text-ink/70">{{ property.address }}</p>
+      {% if property.google_maps_url %}<a href="{{ property.google_maps_url }}" target="_blank" rel="noopener" class="btn-outline-dark mt-6"><i class="bi bi-signpost-2"></i> Get Directions</a>{% endif %}
     </div>
+    {% if property.google_maps_embed_url %}
+    <div class="aspect-[4/3] overflow-hidden rounded-lg shadow-lg">
+      <iframe class="h-full w-full" src="{{ property.google_maps_embed_url }}" allowfullscreen loading="lazy" title="Villa location"></iframe>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="bg-forest-dark py-20 text-center text-white">
+  <div class="mx-auto max-w-2xl px-6 lg:px-8">
+    <h2 class="font-display text-3xl font-bold md:text-4xl">Ready for Your Escape?</h2>
+    <p class="mt-3 text-white/70">Book directly with us and enjoy the best rates — no commission, no middleman.</p>
+    <a href="{% url 'bookings:inquire' %}" class="btn-primary mt-8 inline-flex">Check Availability</a>
   </div>
 </section>
 {% endblock %}

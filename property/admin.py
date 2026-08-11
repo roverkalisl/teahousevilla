@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Facility, Media, Price, Property, Room
+from .models import Attraction, Facility, Media, Price, Property, Room, Testimonial
 
 
 def thumb(obj):
@@ -37,7 +37,7 @@ class RoomInline(admin.StackedInline):
 class PropertyAdmin(admin.ModelAdmin):
     inlines = [PriceInline, MediaInline]
     fieldsets = (
-        ("Overview", {"fields": ("name", "tagline", "short_description", "full_description", "hero_image")}),
+        ("Overview", {"fields": ("name", "tagline", "short_description", "full_description", "hero_image", "hero_video_url")}),
         ("Location", {"fields": ("address", "google_maps_url", "google_maps_embed_url")}),
         ("Capacity", {"fields": ("max_guests", "bedrooms", "bathrooms", "property_size_sqm")}),
         ("Stay Policy", {"fields": ("check_in_time", "check_out_time", "house_rules", "cancellation_policy")}),
@@ -81,3 +81,19 @@ class MediaAdmin(admin.ModelAdmin):
 class PriceAdmin(admin.ModelAdmin):
     list_display = ("villa", "price_type", "amount", "start_date", "end_date", "active")
     list_filter = ("price_type", "active")
+
+
+@admin.register(Attraction)
+class AttractionAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "distance_text", "villa", "active", "display_order")
+    list_filter = ("category", "active")
+    search_fields = ("name", "description")
+    list_editable = ("display_order", "active")
+
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ("guest_name", "rating", "source", "stay_date", "active", "display_order")
+    list_filter = ("source", "rating", "active")
+    search_fields = ("guest_name", "review_text")
+    list_editable = ("display_order", "active")

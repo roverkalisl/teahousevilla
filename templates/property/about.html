@@ -4,52 +4,73 @@
 
 {% block content %}
 <section class="section">
-  <div class="container">
-    <div class="section-eyebrow">About</div>
-    <h1 class="section-title display-font">{{ property.name|default:"The Villa" }}</h1>
-    <p class="lead col-lg-8">{{ property.full_description|default:property.short_description }}</p>
+  <div class="mx-auto max-w-4xl px-6 lg:px-8">
+    <p class="eyebrow">About</p>
+    <h1 class="mt-2 text-4xl font-bold text-forest md:text-5xl">{{ property.name|default:"The Villa" }}</h1>
+    <p class="mt-5 text-lg leading-relaxed text-ink/75">{{ property.full_description|default:property.short_description }}</p>
 
-    <div class="row g-3 my-4">
-      {% if property.max_guests %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-people"></i><span>{{ property.max_guests }} Guests</span></div></div>{% endif %}
-      {% if property.bedrooms %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-door-closed"></i><span>{{ property.bedrooms }} Bedrooms</span></div></div>{% endif %}
-      {% if property.bathrooms %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-droplet"></i><span>{{ property.bathrooms }} Bathrooms</span></div></div>{% endif %}
-      {% if property.property_size_sqm %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-arrows-fullscreen"></i><span>{{ property.property_size_sqm }} sqm</span></div></div>{% endif %}
+    <div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+      {% if property.max_guests %}<div class="pill"><i class="bi bi-people text-lg text-gold"></i><span class="text-sm font-medium">{{ property.max_guests }} Guests</span></div>{% endif %}
+      {% if property.bedrooms %}<div class="pill"><i class="bi bi-door-closed text-lg text-gold"></i><span class="text-sm font-medium">{{ property.bedrooms }} Bedrooms</span></div>{% endif %}
+      {% if property.bathrooms %}<div class="pill"><i class="bi bi-droplet text-lg text-gold"></i><span class="text-sm font-medium">{{ property.bathrooms }} Bathrooms</span></div>{% endif %}
+      {% if property.property_size_sqm %}<div class="pill"><i class="bi bi-arrows-fullscreen text-lg text-gold"></i><span class="text-sm font-medium">{{ property.property_size_sqm }} sqm</span></div>{% endif %}
     </div>
 
-    <div class="row g-4 mt-2">
-      <div class="col-md-6">
-        <div class="villa-card p-4">
-          <h5><i class="bi bi-clock me-2"></i>Check-in / Check-out</h5>
-          <p class="mb-1">Check-in: {{ property.check_in_time|default:"2:00 PM" }}</p>
-          <p class="mb-0">Check-out: {{ property.check_out_time|default:"11:00 AM" }}</p>
-        </div>
+    <div class="mt-10 grid gap-6 md:grid-cols-2">
+      <div class="card p-6">
+        <h3 class="flex items-center gap-2 font-semibold text-forest"><i class="bi bi-clock text-gold"></i>Check-in / Check-out</h3>
+        <p class="mt-2 text-sm text-ink/70">Check-in: {{ property.check_in_time|default:"2:00 PM" }}</p>
+        <p class="text-sm text-ink/70">Check-out: {{ property.check_out_time|default:"11:00 AM" }}</p>
       </div>
-      <div class="col-md-6">
-        <div class="villa-card p-4">
-          <h5><i class="bi bi-x-circle me-2"></i>Cancellation Policy</h5>
-          <p class="mb-0">{{ property.cancellation_policy|default:"Free cancellation up to 7 days before check-in. Please contact us for details."|linebreaks }}</p>
-        </div>
+      <div class="card p-6">
+        <h3 class="flex items-center gap-2 font-semibold text-forest"><i class="bi bi-x-circle text-gold"></i>Cancellation Policy</h3>
+        <div class="mt-2 text-sm leading-relaxed text-ink/70">{{ property.cancellation_policy|default:"Free cancellation up to 7 days before check-in. Please contact us for details."|linebreaks }}</div>
       </div>
     </div>
 
-    <div class="villa-card p-4 mt-4">
-      <h5><i class="bi bi-journal-check me-2"></i>House Rules</h5>
-      <div>{{ property.house_rules|default:"No smoking indoors. No parties or events. Pets on request. Quiet hours after 10 PM."|linebreaks }}</div>
+    <div class="card mt-6 p-6">
+      <h3 class="flex items-center gap-2 font-semibold text-forest"><i class="bi bi-journal-check text-gold"></i>House Rules</h3>
+      <div class="mt-2 text-sm leading-relaxed text-ink/70">{{ property.house_rules|default:"No smoking indoors. No parties or events. Pets on request. Quiet hours after 10 PM."|linebreaks }}</div>
     </div>
   </div>
 </section>
 
 {% if facilities %}
 <section class="section section-alt">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Amenities</div>
-      <h2 class="section-title display-font">Everything You Need</h2>
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Amenities</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Everything You Need</h2>
     </div>
-    <div class="row g-3">
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
       {% for facility in facilities %}
-      <div class="col-6 col-md-3">
-        <div class="facility-pill"><i class="bi {{ facility.icon }}"></i><span>{{ facility.name }}</span></div>
+      <div class="pill"><i class="bi {{ facility.icon }} text-lg text-gold"></i><span class="text-sm font-medium">{{ facility.name }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if attractions %}
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Explore the Area</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Nearby Attractions</h2>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {% for spot in attractions %}
+      <div class="card">
+        {% if spot.image %}<img src="{{ spot.image.url }}" alt="{{ spot.name }}" class="h-40 w-full object-cover">{% endif %}
+        <div class="p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-forest">{{ spot.name }}</h3>
+            <span class="badge">{{ spot.distance_text }}</span>
+          </div>
+          <p class="mt-1 text-xs uppercase tracking-wide text-gold">{{ spot.get_category_display }}</p>
+          {% if spot.description %}<p class="mt-2 text-sm text-ink/70">{{ spot.description }}</p>{% endif %}
+          {% if spot.google_maps_url %}<a href="{{ spot.google_maps_url }}" target="_blank" rel="noopener" class="mt-3 inline-block text-sm font-semibold text-forest hover:text-gold">View on Map &rarr;</a>{% endif %}
+        </div>
       </div>
       {% endfor %}
     </div>

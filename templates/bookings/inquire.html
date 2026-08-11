@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Check Availability — {{ property.name|default:"Villa" }}{% endblock %}
+{% block meta_description %}Send a booking inquiry to {{ property.name }} — we'll confirm availability and get back to you.{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="mx-auto max-w-3xl px-6 lg:px-8">
+    <div class="text-center">
+      <p class="eyebrow">Book Your Stay</p>
+      <h1 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Check Availability</h1>
+      <p class="mt-3 text-ink/70">
+        Tell us your dates and we'll confirm availability directly — no commission, no middleman.
+      </p>
+    </div>
+
+    <form method="post" class="mt-10 space-y-6 rounded-lg bg-white p-6 shadow-lg shadow-forest/10 md:p-10">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="grid gap-6 sm:grid-cols-2">
+        <div>
+          <label class="field-label" for="{{ form.check_in.id_for_label }}">Check-in</label>
+          {{ form.check_in }}
+          {% for error in form.check_in.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+          <label class="field-label" for="{{ form.check_out.id_for_label }}">Check-out</label>
+          {{ form.check_out }}
+          {% for error in form.check_out.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+          <label class="field-label" for="{{ form.adults.id_for_label }}">Adults</label>
+          {{ form.adults }}
+        </div>
+        <div>
+          <label class="field-label" for="{{ form.children.id_for_label }}">Children</label>
+          {{ form.children }}
+        </div>
+        <div>
+          <label class="field-label" for="{{ form.full_name.id_for_label }}">Full Name</label>
+          {{ form.full_name }}
+          {% for error in form.full_name.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+          <label class="field-label" for="{{ form.email.id_for_label }}">Email</label>
+          {{ form.email }}
+          {% for error in form.email.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+          <label class="field-label" for="{{ form.phone.id_for_label }}">Phone</label>
+          {{ form.phone }}
+          {% for error in form.phone.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+          <label class="field-label" for="{{ form.whatsapp_number.id_for_label }}">WhatsApp Number</label>
+          {{ form.whatsapp_number }}
+        </div>
+      </div>
+
+      <div>
+        <label class="field-label" for="{{ form.message.id_for_label }}">Message</label>
+        {{ form.message }}
+      </div>
+
+      <button type="submit" class="btn-primary w-full sm:w-auto">Send Inquiry</button>
+    </form>
+
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-4 text-center text-sm text-ink/60">
+      <span>Prefer to talk directly?</span>
+      {% if property.whatsapp_link %}<a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="font-semibold text-forest hover:text-gold"><i class="bi bi-whatsapp me-1"></i>WhatsApp us</a>{% endif %}
+      {% if property.phone_number %}<a href="tel:{{ property.phone_number }}" class="font-semibold text-forest hover:text-gold"><i class="bi bi-telephone me-1"></i>{{ property.phone_number }}</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

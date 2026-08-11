@@ -1,0 +1,13 @@
+{
+  "name": "teahouse-villa-website",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build-css": "tailwindcss -i ./static_src/css/input.css -o ./static/css/tailwind.css --minify",
+    "watch-css": "tailwindcss -i ./static_src/css/input.css -o ./static/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}

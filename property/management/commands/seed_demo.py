@@ -4,7 +4,7 @@ from pathlib import Path
 from django.core.files import File
 from django.core.management.base import BaseCommand
 
-from property.models import Facility, Media, Price, Property, Room
+from property.models import Attraction, Facility, Media, Price, Property, Room, Testimonial
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 PLACEHOLDER_DIR = BASE_DIR / "static" / "img" / "placeholders"
@@ -56,6 +56,20 @@ GALLERY = [
     ("villa-kitchen.jpg", "Fully Equipped Kitchen", "kitchen", False),
     ("bathroom-1.jpg", "Modern Bathroom", "bathrooms", False),
     ("nearby-beach.jpg", "Beach Nearby", "nearby", False),
+]
+
+ATTRACTIONS = [
+    ("Unawatuna Beach", "beach", "8 km", "A golden, palm-fringed bay popular for swimming and sunsets."),
+    ("Galle Fort", "landmark", "12 km", "A UNESCO World Heritage colonial fort with boutique shops and cafes."),
+    ("The Fort Printers", "restaurant", "12 km", "An elegant fine-dining restaurant inside a restored colonial townhouse."),
+    ("Jungle Beach", "beach", "10 km", "A quieter, more secluded cove tucked away from the main tourist strip."),
+    ("Koggala Lake", "activity", "15 min drive", "Boat safaris through mangroves, cinnamon islands and bird-spotting tours."),
+]
+
+TESTIMONIALS = [
+    ("Priya S.", 5, "An absolutely stunning property with impeccable service. We felt right at home from the moment we arrived.", "google"),
+    ("James & Family", 5, "The pool, the views, the hospitality — everything exceeded our expectations. Highly recommended!", "airbnb"),
+    ("Nadia R.", 5, "Booking directly with the villa was so easy, and the owner was incredibly responsive on WhatsApp.", "direct"),
 ]
 
 
@@ -164,5 +178,33 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Created sample pricing."))
         else:
             self.stdout.write("Prices already exist, skipping.")
+
+        if not Attraction.objects.exists():
+            for order, (name, category, distance_text, description) in enumerate(ATTRACTIONS):
+                Attraction.objects.create(
+                    villa=site,
+                    name=name,
+                    category=category,
+                    distance_text=distance_text,
+                    description=description,
+                    display_order=order,
+                )
+            self.stdout.write(self.style.SUCCESS(f"Created {len(ATTRACTIONS)} attractions."))
+        else:
+            self.stdout.write("Attractions already exist, skipping.")
+
+        if not Testimonial.objects.exists():
+            for order, (guest_name, rating, review_text, source) in enumerate(TESTIMONIALS):
+                Testimonial.objects.create(
+                    villa=site,
+                    guest_name=guest_name,
+                    rating=rating,
+                    review_text=review_text,
+                    source=source,
+                    display_order=order,
+                )
+            self.stdout.write(self.style.SUCCESS(f"Created {len(TESTIMONIALS)} testimonials."))
+        else:
+            self.stdout.write("Testimonials already exist, skipping.")
 
         self.stdout.write(self.style.SUCCESS("Demo data seed complete."))

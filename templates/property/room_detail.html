@@ -5,49 +5,47 @@
 
 {% block content %}
 <section class="section">
-  <div class="container">
-    <nav class="mb-4 small"><a href="{% url 'property:room_list' %}">&larr; All Rooms</a></nav>
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <nav class="mb-8 text-sm"><a href="{% url 'property:room_list' %}" class="text-forest hover:text-gold">&larr; All Rooms</a></nav>
 
-    <div class="row g-5">
-      <div class="col-lg-7">
+    <div class="grid gap-10 lg:grid-cols-5">
+      <div class="lg:col-span-3">
         {% if room_media %}
-        <div class="row g-3 gallery-grid">
+        <div class="grid grid-cols-2 gap-3">
           {% for item in room_media %}
           {% if item.media_type == "image" %}
-          <div class="col-6">
-            <div class="gallery-item ratio ratio-4x3">
-              <img src="{{ item.image.url }}" alt="{{ item.caption|default:room.name }}" class="w-100 h-100">
-            </div>
+          <div class="aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="{{ item.image.url }}" alt="{{ item.caption|default:room.name }}" class="h-full w-full object-cover">
           </div>
           {% endif %}
           {% endfor %}
         </div>
         {% else %}
-        <img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}" class="w-100 rounded">
+        <img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}" class="w-full rounded-lg">
         {% endif %}
       </div>
-      <div class="col-lg-5">
-        <h1 class="display-font">{{ room.name }}</h1>
-        <div class="d-flex flex-wrap gap-3 my-3">
-          <span class="facility-pill"><i class="bi bi-people"></i>Sleeps {{ room.capacity }}</span>
-          {% if room.bed_type %}<span class="facility-pill"><i class="bi bi-house-door"></i>{{ room.bed_type }}</span>{% endif %}
-          {% if room.has_ac %}<span class="facility-pill"><i class="bi bi-snow"></i>AC</span>{% endif %}
-          {% if room.bathroom_info %}<span class="facility-pill"><i class="bi bi-droplet"></i>{{ room.bathroom_info }}</span>{% endif %}
+      <div class="lg:col-span-2">
+        <h1 class="text-3xl font-bold text-forest">{{ room.name }}</h1>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <span class="pill text-sm"><i class="bi bi-people text-gold"></i>Sleeps {{ room.capacity }}</span>
+          {% if room.bed_type %}<span class="pill text-sm"><i class="bi bi-house-door text-gold"></i>{{ room.bed_type }}</span>{% endif %}
+          {% if room.has_ac %}<span class="pill text-sm"><i class="bi bi-snow text-gold"></i>AC</span>{% endif %}
+          {% if room.bathroom_info %}<span class="pill text-sm"><i class="bi bi-droplet text-gold"></i>{{ room.bathroom_info }}</span>{% endif %}
         </div>
-        <p>{{ room.description }}</p>
+        <p class="mt-5 text-ink/75">{{ room.description }}</p>
 
         {% if room.facilities.all %}
-        <h6 class="mt-4 mb-2">Room Facilities</h6>
-        <div class="d-flex flex-wrap gap-2">
+        <h3 class="mt-6 mb-2 text-sm font-semibold text-forest">Room Facilities</h3>
+        <div class="flex flex-wrap gap-2">
           {% for facility in room.facilities.all %}
-          <span class="badge bg-light text-dark border"><i class="bi {{ facility.icon }} me-1"></i>{{ facility.name }}</span>
+          <span class="badge"><i class="bi {{ facility.icon }}"></i>{{ facility.name }}</span>
           {% endfor %}
         </div>
         {% endif %}
 
-        <div class="d-flex flex-wrap gap-3 mt-4">
-          <a href="{% url 'bookings:placeholder' %}" class="btn btn-villa-primary">Check Availability</a>
-          {% if property.whatsapp_link %}<a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn btn-villa-outline" style="border-color:var(--villa-forest);color:var(--villa-forest);"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>{% endif %}
+        <div class="mt-8 flex flex-wrap gap-4">
+          <a href="{% url 'bookings:inquire' %}" class="btn-primary">Check Availability</a>
+          {% if property.whatsapp_link %}<a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn-outline-dark"><i class="bi bi-whatsapp"></i>WhatsApp</a>{% endif %}
         </div>
       </div>
     </div>

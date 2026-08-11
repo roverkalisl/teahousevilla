@@ -13,31 +13,37 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
 {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="bg-cream text-ink font-sans">
 
-<nav class="navbar navbar-expand-lg villa-navbar sticky-top">
-  <div class="container">
-    <a class="navbar-brand" href="{% url 'property:home' %}">{{ site_property.name|default:"Villa" }}</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-        <li class="nav-item"><a class="nav-link" href="{% url 'property:home' %}">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'property:about' %}">About</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'property:room_list' %}">Rooms</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'property:gallery' %}">Gallery</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'property:contact' %}">Contact</a></li>
-        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-          <a class="btn btn-villa-primary" href="{% url 'bookings:placeholder' %}">Book Now</a>
-        </li>
-      </ul>
+<nav x-data="" class="sticky top-0 z-50 border-b border-forest/10 bg-cream/95 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+    <a href="{% url 'property:home' %}" class="font-display text-xl font-bold text-forest">{{ site_property.name|default:"Villa" }}</a>
+
+    <div class="hidden items-center gap-8 lg:flex">
+      <a href="{% url 'property:home' %}" class="text-sm font-medium text-ink hover:text-gold">Home</a>
+      <a href="{% url 'property:about' %}" class="text-sm font-medium text-ink hover:text-gold">About</a>
+      <a href="{% url 'property:room_list' %}" class="text-sm font-medium text-ink hover:text-gold">Rooms</a>
+      <a href="{% url 'property:gallery' %}" class="text-sm font-medium text-ink hover:text-gold">Gallery</a>
+      <a href="{% url 'property:contact' %}" class="text-sm font-medium text-ink hover:text-gold">Contact</a>
+      <a href="{% url 'bookings:inquire' %}" class="btn-primary">Book Now</a>
     </div>
+
+    <button id="navToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" class="flex h-10 w-10 items-center justify-center rounded text-forest lg:hidden">
+      <i class="bi bi-list text-2xl"></i>
+    </button>
+  </div>
+
+  <div id="mobileNav" class="hidden flex-col gap-1 border-t border-forest/10 bg-cream px-6 py-4 lg:hidden">
+    <a href="{% url 'property:home' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Home</a>
+    <a href="{% url 'property:about' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">About</a>
+    <a href="{% url 'property:room_list' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Rooms</a>
+    <a href="{% url 'property:gallery' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Gallery</a>
+    <a href="{% url 'property:contact' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Contact</a>
+    <a href="{% url 'bookings:inquire' %}" class="btn-primary mt-2 justify-center">Book Now</a>
   </div>
 </nav>
 
@@ -45,49 +51,48 @@
 {% block content %}{% endblock %}
 </main>
 
-<footer class="villa-footer">
-  <div class="container py-5">
-    <div class="row gy-4">
-      <div class="col-lg-4">
-        <h5 class="footer-brand">{{ site_property.name|default:"Villa" }}</h5>
-        <p class="text-muted-light">{{ site_property.tagline }}</p>
-        <div class="d-flex gap-3 fs-5 mt-3">
-          {% if site_property.facebook_url %}<a href="{{ site_property.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
-          {% if site_property.instagram_url %}<a href="{{ site_property.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
-          {% if site_property.tiktok_url %}<a href="{{ site_property.tiktok_url }}" target="_blank" rel="noopener" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>{% endif %}
-          {% if site_property.youtube_url %}<a href="{{ site_property.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
+<footer class="bg-forest-dark text-white/80">
+  <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+    <div class="grid gap-10 lg:grid-cols-3">
+      <div>
+        <h5 class="font-display text-lg text-white">{{ site_property.name|default:"Villa" }}</h5>
+        <p class="mt-2 text-white/60">{{ site_property.tagline }}</p>
+        <div class="mt-4 flex gap-4 text-lg">
+          {% if site_property.facebook_url %}<a href="{{ site_property.facebook_url }}" target="_blank" rel="noopener" class="hover:text-gold" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+          {% if site_property.instagram_url %}<a href="{{ site_property.instagram_url }}" target="_blank" rel="noopener" class="hover:text-gold" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+          {% if site_property.tiktok_url %}<a href="{{ site_property.tiktok_url }}" target="_blank" rel="noopener" class="hover:text-gold" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>{% endif %}
+          {% if site_property.youtube_url %}<a href="{{ site_property.youtube_url }}" target="_blank" rel="noopener" class="hover:text-gold" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
         </div>
       </div>
-      <div class="col-lg-4">
-        <h6 class="footer-heading">Quick Links</h6>
-        <ul class="list-unstyled footer-links">
-          <li><a href="{% url 'property:about' %}">About the Villa</a></li>
-          <li><a href="{% url 'property:room_list' %}">Rooms</a></li>
-          <li><a href="{% url 'property:gallery' %}">Gallery</a></li>
-          <li><a href="{% url 'bookings:placeholder' %}">Check Availability</a></li>
+      <div>
+        <h6 class="eyebrow">Quick Links</h6>
+        <ul class="mt-3 space-y-2">
+          <li><a href="{% url 'property:about' %}" class="hover:text-gold">About the Villa</a></li>
+          <li><a href="{% url 'property:room_list' %}" class="hover:text-gold">Rooms</a></li>
+          <li><a href="{% url 'property:gallery' %}" class="hover:text-gold">Gallery</a></li>
+          <li><a href="{% url 'bookings:inquire' %}" class="hover:text-gold">Check Availability</a></li>
         </ul>
       </div>
-      <div class="col-lg-4">
-        <h6 class="footer-heading">Contact</h6>
-        <ul class="list-unstyled footer-links">
-          {% if site_property.address %}<li><i class="bi bi-geo-alt me-2"></i>{{ site_property.address }}</li>{% endif %}
-          {% if site_property.phone_number %}<li><i class="bi bi-telephone me-2"></i><a href="tel:{{ site_property.phone_number }}">{{ site_property.phone_number }}</a></li>{% endif %}
-          {% if site_property.email %}<li><i class="bi bi-envelope me-2"></i><a href="mailto:{{ site_property.email }}">{{ site_property.email }}</a></li>{% endif %}
+      <div>
+        <h6 class="eyebrow">Contact</h6>
+        <ul class="mt-3 space-y-2">
+          {% if site_property.address %}<li class="flex gap-2"><i class="bi bi-geo-alt mt-0.5"></i>{{ site_property.address }}</li>{% endif %}
+          {% if site_property.phone_number %}<li class="flex gap-2"><i class="bi bi-telephone mt-0.5"></i><a href="tel:{{ site_property.phone_number }}" class="hover:text-gold">{{ site_property.phone_number }}</a></li>{% endif %}
+          {% if site_property.email %}<li class="flex gap-2"><i class="bi bi-envelope mt-0.5"></i><a href="mailto:{{ site_property.email }}" class="hover:text-gold">{{ site_property.email }}</a></li>{% endif %}
         </ul>
       </div>
     </div>
-    <hr class="footer-divider">
-    <p class="text-center text-muted-light small mb-0">&copy; {% now "Y" %} {{ site_property.name|default:"Villa" }}. All rights reserved.</p>
+    <hr class="my-10 border-white/10">
+    <p class="text-center text-sm text-white/50">&copy; {% now "Y" %} {{ site_property.name|default:"Villa" }}. All rights reserved.</p>
   </div>
 </footer>
 
 {% if site_property.whatsapp_link %}
-<a href="{{ site_property.whatsapp_link }}" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Chat on WhatsApp">
+<a href="{{ site_property.whatsapp_link }}" target="_blank" rel="noopener" class="fixed bottom-7 right-7 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-2xl text-white shadow-lg transition hover:scale-105" aria-label="Chat on WhatsApp">
   <i class="bi bi-whatsapp"></i>
 </a>
 {% endif %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'js/main.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>

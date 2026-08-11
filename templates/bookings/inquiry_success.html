@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Inquiry Received — {{ property.name|default:"Villa" }}{% endblock %}
+
+{% block content %}
+<section class="section" style="min-height:60vh;display:flex;align-items:center;">
+  <div class="mx-auto max-w-2xl px-6 text-center lg:px-8">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-forest/10 text-3xl text-forest">
+      <i class="bi bi-check2"></i>
+    </div>
+    <p class="eyebrow mt-6">Thank You</p>
+    <h1 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Inquiry Received</h1>
+    <p class="mt-4 text-ink/70">
+      Thanks, {{ inquiry.full_name }} — we've received your inquiry for
+      <strong>{{ inquiry.check_in|date:"d M Y" }}</strong> to <strong>{{ inquiry.check_out|date:"d M Y" }}</strong>
+      ({{ inquiry.nights }} night{{ inquiry.nights|pluralize }}, {{ inquiry.adults }} adult{{ inquiry.adults|pluralize }}{% if inquiry.children %}, {{ inquiry.children }} child{{ inquiry.children|pluralize:",ren" }}{% endif %}).
+      We'll confirm availability by email shortly.
+    </p>
+    {% if inquiry.estimated_total %}
+    <p class="mt-2 text-ink/70">Estimated total: <span class="badge">Rs. {{ inquiry.estimated_total }}</span></p>
+    {% endif %}
+
+    <div class="mt-8 flex flex-wrap justify-center gap-4">
+      {% if whatsapp_link %}
+      <a href="{{ whatsapp_link }}" target="_blank" rel="noopener" class="btn-primary">
+        <i class="bi bi-whatsapp"></i> Continue on WhatsApp
+      </a>
+      {% endif %}
+      <a href="{% url 'property:home' %}" class="btn-outline-dark">Back to Home</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

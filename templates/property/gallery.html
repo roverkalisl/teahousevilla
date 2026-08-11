@@ -4,74 +4,54 @@
 
 {% block content %}
 <section class="section">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Gallery</div>
-      <h1 class="section-title display-font">Photos &amp; Videos</h1>
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-10 text-center">
+      <p class="eyebrow">Gallery</p>
+      <h1 class="mt-2 text-4xl font-bold text-forest md:text-5xl">Photos &amp; Videos</h1>
     </div>
 
     {% if images %}
-    <ul class="nav nav-pills justify-content-center gap-2 mb-4" id="galleryFilters">
-      <li class="nav-item"><button class="nav-link active" data-filter="all">All</button></li>
+    <div id="galleryFilters" class="mb-8 flex flex-wrap justify-center gap-2">
+      <button type="button" class="rounded-full bg-forest px-4 py-2 text-sm font-medium text-white" data-filter="all">All</button>
       {% for value, label in categories %}
-      <li class="nav-item"><button class="nav-link" data-filter="{{ value }}">{{ label }}</button></li>
+      <button type="button" class="rounded-full bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-forest hover:text-white" data-filter="{{ value }}">{{ label }}</button>
       {% endfor %}
-    </ul>
+    </div>
 
-    <div class="row g-3 gallery-grid">
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
       {% for item in images %}
-      <div class="col-6 col-md-4 col-lg-3 gallery-cell" data-category="{{ item.category }}">
-        <div class="gallery-item ratio ratio-1x1">
-          <img src="{{ item.image.url }}" alt="{{ item.caption|default:property.name }}" class="w-100 h-100">
+      <div class="gallery-cell" data-category="{{ item.category }}">
+        <div class="aspect-square overflow-hidden rounded-lg">
+          <img src="{{ item.image.url }}" alt="{{ item.caption|default:property.name }}" class="h-full w-full object-cover transition duration-300 hover:scale-105">
         </div>
-        {% if item.caption %}<p class="small text-muted mb-3">{{ item.caption }}</p>{% endif %}
+        {% if item.caption %}<p class="mt-1 text-xs text-ink/50">{{ item.caption }}</p>{% endif %}
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-center text-muted">Photos coming soon.</p>
+    <p class="text-center text-ink/60">Photos coming soon.</p>
     {% endif %}
   </div>
 </section>
 
 {% if videos %}
 <section class="section section-alt">
-  <div class="container">
-    <div class="text-center mb-5">
-      <div class="section-eyebrow">Video Tour</div>
-      <h2 class="section-title display-font">Watch the Villa</h2>
+  <div class="mx-auto max-w-5xl px-6 lg:px-8">
+    <div class="mb-10 text-center">
+      <p class="eyebrow">Video Tour</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Watch the Villa</h2>
     </div>
-    <div class="row g-4 justify-content-center">
+    <div class="grid gap-6 md:grid-cols-2">
       {% for video in videos %}
-      <div class="col-md-6">
-        <div class="ratio ratio-16x9">
-          <iframe src="{{ video.video_embed_url }}" title="{{ video.caption }}" allowfullscreen loading="lazy"></iframe>
+      <div>
+        <div class="aspect-video overflow-hidden rounded-lg shadow-lg">
+          <iframe class="h-full w-full" src="{{ video.video_embed_url }}" title="{{ video.caption }}" allowfullscreen loading="lazy"></iframe>
         </div>
-        {% if video.caption %}<p class="text-center text-muted small mt-2">{{ video.caption }}</p>{% endif %}
+        {% if video.caption %}<p class="mt-2 text-center text-sm text-ink/60">{{ video.caption }}</p>{% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
 {% endif %}
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  var buttons = document.querySelectorAll("#galleryFilters button");
-  var cells = document.querySelectorAll(".gallery-cell");
-  buttons.forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      buttons.forEach(function (b) { b.classList.remove("active"); });
-      btn.classList.add("active");
-      var filter = btn.getAttribute("data-filter");
-      cells.forEach(function (cell) {
-        var show = filter === "all" || cell.getAttribute("data-category") === filter;
-        cell.style.display = show ? "" : "none";
-      });
-    });
-  });
-});
-</script>
 {% endblock %}
