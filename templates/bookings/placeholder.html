@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Check Availability — {{ property.name|default:"Villa" }}{% endblock %}
+{% block meta_description %}Booking inquiries for {{ property.name }} — coming soon.{% endblock %}
+
+{% block content %}
+<section class="section" style="min-height:60vh;display:flex;align-items:center;">
+  <div class="container text-center">
+    <div class="section-eyebrow">Bookings</div>
+    <h1 class="section-title display-font">Online Booking Coming Soon</h1>
+    <p class="lead col-lg-7 mx-auto">
+      Our direct booking and availability calendar is being finalised. In the meantime, reach out
+      to us directly and we'll help you check availability and confirm your stay.
+    </p>
+    <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+      {% if property.whatsapp_link %}
+      <a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn btn-villa-primary btn-lg">
+        <i class="bi bi-whatsapp me-1"></i> Message Us on WhatsApp
+      </a>
+      {% endif %}
+      {% if property.phone_number %}
+      <a href="tel:{{ property.phone_number }}" class="btn btn-villa-outline btn-lg" style="border-color:var(--villa-forest);color:var(--villa-forest);">
+        <i class="bi bi-telephone me-1"></i> Call Us
+      </a>
+      {% endif %}
+      {% if property.email %}
+      <a href="mailto:{{ property.email }}" class="btn btn-villa-outline btn-lg" style="border-color:var(--villa-forest);color:var(--villa-forest);">
+        <i class="bi bi-envelope me-1"></i> Email Us
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}About — {{ property.name|default:"Villa" }}{% endblock %}
+{% block meta_description %}{{ property.short_description }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-eyebrow">About</div>
+    <h1 class="section-title display-font">{{ property.name|default:"The Villa" }}</h1>
+    <p class="lead col-lg-8">{{ property.full_description|default:property.short_description }}</p>
+
+    <div class="row g-3 my-4">
+      {% if property.max_guests %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-people"></i><span>{{ property.max_guests }} Guests</span></div></div>{% endif %}
+      {% if property.bedrooms %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-door-closed"></i><span>{{ property.bedrooms }} Bedrooms</span></div></div>{% endif %}
+      {% if property.bathrooms %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-droplet"></i><span>{{ property.bathrooms }} Bathrooms</span></div></div>{% endif %}
+      {% if property.property_size_sqm %}<div class="col-6 col-md-3"><div class="facility-pill"><i class="bi bi-arrows-fullscreen"></i><span>{{ property.property_size_sqm }} sqm</span></div></div>{% endif %}
+    </div>
+
+    <div class="row g-4 mt-2">
+      <div class="col-md-6">
+        <div class="villa-card p-4">
+          <h5><i class="bi bi-clock me-2"></i>Check-in / Check-out</h5>
+          <p class="mb-1">Check-in: {{ property.check_in_time|default:"2:00 PM" }}</p>
+          <p class="mb-0">Check-out: {{ property.check_out_time|default:"11:00 AM" }}</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="villa-card p-4">
+          <h5><i class="bi bi-x-circle me-2"></i>Cancellation Policy</h5>
+          <p class="mb-0">{{ property.cancellation_policy|default:"Free cancellation up to 7 days before check-in. Please contact us for details."|linebreaks }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="villa-card p-4 mt-4">
+      <h5><i class="bi bi-journal-check me-2"></i>House Rules</h5>
+      <div>{{ property.house_rules|default:"No smoking indoors. No parties or events. Pets on request. Quiet hours after 10 PM."|linebreaks }}</div>
+    </div>
+  </div>
+</section>
+
+{% if facilities %}
+<section class="section section-alt">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-eyebrow">Amenities</div>
+      <h2 class="section-title display-font">Everything You Need</h2>
+    </div>
+    <div class="row g-3">
+      {% for facility in facilities %}
+      <div class="col-6 col-md-3">
+        <div class="facility-pill"><i class="bi {{ facility.icon }}"></i><span>{{ facility.name }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

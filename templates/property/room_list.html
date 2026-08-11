@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Rooms — {{ property.name|default:"Villa" }}{% endblock %}
+{% block meta_description %}Explore the rooms and suites available at {{ property.name }}.{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-eyebrow">Accommodation</div>
+      <h1 class="section-title display-font">Rooms &amp; Suites</h1>
+    </div>
+
+    {% if rooms %}
+    <div class="row g-4">
+      {% for room in rooms %}
+      <div class="col-md-6 col-lg-4">
+        <div class="villa-card">
+          {% if room.cover_image %}<img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}">{% else %}<img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}">{% endif %}
+          <div class="card-body">
+            <h5>{{ room.name }}</h5>
+            <p class="text-muted small mb-2">{{ room.bed_type }} &middot; Sleeps {{ room.capacity }}{% if room.has_ac %} &middot; AC{% endif %}</p>
+            <p class="mb-3">{{ room.description|truncatewords:20 }}</p>
+            <a href="{{ room.get_absolute_url }}" class="btn btn-sm btn-villa-primary">View Room</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted">Room details coming soon. Please contact us for availability.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
