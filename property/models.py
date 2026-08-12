@@ -46,6 +46,9 @@ class Property(models.Model):
     tiktok_url = models.URLField(blank=True)
     youtube_url = models.URLField(blank=True)
 
+    airbnb_url = models.URLField(blank=True, help_text="Link to the Airbnb listing, if any.")
+    booking_com_url = models.URLField(blank=True, help_text="Link to the Booking.com listing, if any.")
+
     hero_image = models.ImageField(upload_to="hero/", blank=True, null=True)
     hero_video_url = models.URLField(
         blank=True, help_text="Optional YouTube/Vimeo URL for an ambient video hero background. If blank, the hero shows an auto-sliding photo gallery instead."

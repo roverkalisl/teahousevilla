@@ -63,6 +63,12 @@
           {% if site_property.tiktok_url %}<a href="{{ site_property.tiktok_url }}" target="_blank" rel="noopener" class="hover:text-gold" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>{% endif %}
           {% if site_property.youtube_url %}<a href="{{ site_property.youtube_url }}" target="_blank" rel="noopener" class="hover:text-gold" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
         </div>
+        {% if site_property.airbnb_url or site_property.booking_com_url %}
+        <div class="mt-5 flex flex-wrap gap-2 text-sm">
+          {% if site_property.airbnb_url %}<a href="{{ site_property.airbnb_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-full border border-white/20 px-3 py-1 hover:border-gold hover:text-gold">Airbnb <i class="bi bi-box-arrow-up-right text-xs"></i></a>{% endif %}
+          {% if site_property.booking_com_url %}<a href="{{ site_property.booking_com_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-full border border-white/20 px-3 py-1 hover:border-gold hover:text-gold">Booking.com <i class="bi bi-box-arrow-up-right text-xs"></i></a>{% endif %}
+        </div>
+        {% endif %}
       </div>
       <div>
         <h6 class="eyebrow">Quick Links</h6>

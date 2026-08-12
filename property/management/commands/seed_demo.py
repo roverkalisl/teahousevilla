@@ -108,6 +108,8 @@ class Command(BaseCommand):
                 facebook_url="https://facebook.com/",
                 instagram_url="https://instagram.com/",
                 youtube_url="",
+                airbnb_url="https://www.airbnb.com/",
+                booking_com_url="https://www.booking.com/",
                 starting_price_override=150,
             )
         )

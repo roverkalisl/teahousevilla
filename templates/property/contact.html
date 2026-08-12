@@ -35,6 +35,16 @@
       {% endif %}
     </div>
 
+    {% if property.airbnb_url or property.booking_com_url %}
+    <div class="mb-16 text-center">
+      <p class="eyebrow">Also Book Via</p>
+      <div class="mt-4 flex flex-wrap justify-center gap-4">
+        {% if property.airbnb_url %}<a href="{{ property.airbnb_url }}" target="_blank" rel="noopener" class="btn-outline-dark">Airbnb <i class="bi bi-box-arrow-up-right ms-1"></i></a>{% endif %}
+        {% if property.booking_com_url %}<a href="{{ property.booking_com_url }}" target="_blank" rel="noopener" class="btn-outline-dark">Booking.com <i class="bi bi-box-arrow-up-right ms-1"></i></a>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+
     <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
       <div>
         <h2 class="text-2xl font-bold text-forest">Our Location</h2>

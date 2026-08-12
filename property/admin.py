@@ -43,6 +43,7 @@ class PropertyAdmin(admin.ModelAdmin):
         ("Stay Policy", {"fields": ("check_in_time", "check_out_time", "house_rules", "cancellation_policy")}),
         ("Contact", {"fields": ("phone_number", "whatsapp_number", "email")}),
         ("Social Media", {"fields": ("facebook_url", "instagram_url", "tiktok_url", "youtube_url")}),
+        ("Also Listed On", {"fields": ("airbnb_url", "booking_com_url")}),
         ("Pricing Fallback", {"fields": ("starting_price_override",)}),
     )
 
