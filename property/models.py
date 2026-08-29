@@ -23,7 +23,7 @@ class Property(models.Model):
 
     address = models.CharField(max_length=255, blank=True)
     google_maps_url = models.URLField(blank=True, help_text="Link used for the 'Get Directions' button.")
-    google_maps_embed_url = models.URLField(blank=True, help_text="Embed src URL for the map iframe.")
+    google_maps_embed_url = models.URLField(blank=True, max_length=500, help_text="Embed src URL for the map iframe.")
 
     max_guests = models.PositiveIntegerField(default=0)
     bedrooms = models.PositiveIntegerField(default=0)
