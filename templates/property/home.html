@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static markdown_filters %}
 {% block title %}{{ property.name|default:"Villa" }} — {{ property.tagline }}{% endblock %}
 {% block meta_description %}{{ property.short_description }}{% endblock %}
 
@@ -47,7 +47,9 @@
     <div>
       <p class="eyebrow">Our Story</p>
       <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">A Home Away From Home</h2>
-      <p class="mt-5 leading-relaxed text-ink/75">{{ property.full_description|default:"Nestled in a peaceful setting, this villa combines modern comfort with warm hospitality — the perfect base for a relaxing family getaway or a romantic escape."|truncatewords:60 }}</p>
+      <div class="mt-5 leading-relaxed text-ink/75">
+        {{ property.full_description|default:"Nestled in a peaceful setting, this villa combines modern comfort with warm hospitality — the perfect base for a relaxing family getaway or a romantic escape."|truncatewords:60|markdownify }}
+      </div>
       <a href="{% url 'property:about' %}" class="btn-outline-dark mt-6">Discover the Villa</a>
     </div>
     <div class="grid grid-cols-2 gap-4">
