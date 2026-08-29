@@ -98,22 +98,26 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE = (
+    "cloudinary_storage.storage.StaticCloudinaryStorage"
+    if CLOUDINARY_URL
+    else ("django.contrib.staticfiles.storage.StaticFilesStorage" if DEBUG else "whitenoise.storage.CompressedManifestStaticFilesStorage")
+)
+DEFAULT_FILE_STORAGE = (
+    "cloudinary_storage.storage.MediaCloudinaryStorage"
+    if CLOUDINARY_URL
+    else "django.core.files.storage.FileSystemStorage"
+)
+
 # Manifest storage (cache-busted filenames) is only safe once `collectstatic` has run,
 # so it's reserved for production; dev keeps plain storage + WhiteNoise finder passthrough.
 STORAGES = {
     "staticfiles": {
-        "BACKEND": (
-            "django.contrib.staticfiles.storage.StaticFilesStorage"
-            if DEBUG
-            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-        ),
+        "BACKEND": STATICFILES_STORAGE,
     },
     "default": {
-        "BACKEND": (
-            "cloudinary_storage.storage.MediaCloudinaryStorage"
-            if CLOUDINARY_URL
-            else "django.core.files.storage.FileSystemStorage"
-        ),
+        "BACKEND": DEFAULT_FILE_STORAGE,
     },
 }
 WHITENOISE_USE_FINDERS = DEBUG
