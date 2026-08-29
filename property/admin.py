@@ -61,6 +61,18 @@ class RoomAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     inlines = [MediaInline]
 
+    def save_formset(self, request, form, formset, change):
+        """Automatically set villa for inline media from the room's villa."""
+        if formset.model == Media:
+            instances = formset.save(commit=False)
+            for instance in instances:
+                if not instance.villa_id:
+                    instance.villa = form.instance.villa
+                instance.save()
+            formset.save_m2m()
+        else:
+            formset.save()
+
 
 @admin.register(Facility)
 class FacilityAdmin(admin.ModelAdmin):
