@@ -63,6 +63,14 @@ class InvalidMediaImageUploadTest(TestCase):
 
         self.assertFalse(media.image)
 
+    def test_stale_legacy_path_is_cleared_without_cloudinary_upload(self):
+        villa = Property.objects.create(name="Test Villa")
+        media = Media(villa=villa, media_type=Media.IMAGE, caption="Legacy stale image", image="gallery/does-not-exist.jpg")
+
+        media.save()
+
+        self.assertFalse(media.image)
+
 
 class MarkdownRenderTest(TestCase):
     def test_markdown_filter_renders_html_and_sanitizes(self):

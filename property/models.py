@@ -1,7 +1,9 @@
 import re
 from io import BytesIO
+from pathlib import Path
 
-from django.core.files.base import ContentFile
+from django.conf import settings
+from django.core.files.base import ContentFile, File
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -9,6 +11,17 @@ from django.utils.text import slugify
 from .utils import to_embed_url
 
 MAX_IMAGE_DIMENSION = 1920
+
+
+def _is_cloudinary_url(value):
+    url = str(value or "")
+    return "cloudinary.com" in url.lower() or url.lower().startswith("cloudinary://")
+
+
+def _legacy_local_image_path(name):
+    if not name or isinstance(name, str) and (name.startswith("http://") or name.startswith("https://") or name.startswith("/") or name.startswith("cloudinary://")):
+        return None
+    return Path(settings.MEDIA_ROOT) / str(name)
 
 
 class GoogleMapsEmbedURLField(models.URLField):
@@ -217,6 +230,21 @@ class Media(models.Model):
 
     def save(self, *args, **kwargs):
         if self.media_type == self.IMAGE and self.image:
+            image_name = getattr(self.image, "name", self.image)
+            if _is_cloudinary_url(getattr(self.image, "url", "")):
+                super().save(*args, **kwargs)
+                return
+
+            if getattr(self.image, "_committed", False) and not getattr(self.image, "_file", None):
+                legacy_path = _legacy_local_image_path(image_name)
+                if legacy_path and legacy_path.exists():
+                    with legacy_path.open("rb") as legacy_file:
+                        self.image.save(image_name, File(legacy_file), save=False)
+                else:
+                    self.image = None
+                super().save(*args, **kwargs)
+                return
+
             try:
                 self._resize_image()
             except (AttributeError, FileNotFoundError, OSError, TypeError, ValueError):
