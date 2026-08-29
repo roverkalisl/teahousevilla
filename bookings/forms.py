@@ -2,7 +2,9 @@ import datetime
 
 from django import forms
 
-from .models import BookingInquiry
+from property.models import Property
+
+from .models import AvailabilityBlock, BookingInquiry
 
 INPUT_CLASSES = "input-field"
 
@@ -42,4 +44,13 @@ class BookingInquiryForm(forms.ModelForm):
             self.add_error("check_in", "Check-in date can't be in the past.")
         if check_in and check_out and check_out <= check_in:
             self.add_error("check_out", "Check-out date must be after check-in date.")
+
+        if check_in and check_out and check_in < datetime.date.today() or (check_in and check_out and check_out <= check_in):
+            return cleaned_data
+
+        property_obj = Property.objects.first()
+        if property_obj and not BookingInquiry.is_date_range_available(property_obj, check_in, check_out):
+            self.add_error("check_in", "Selected dates are unavailable. Please choose another date range.")
+            self.add_error("check_out", "Selected dates are unavailable. Please choose another date range.")
+
         return cleaned_data
