@@ -5,8 +5,13 @@ from .models import Attraction, Facility, Media, Price, Property, Room, Testimon
 
 
 def thumb(obj):
-    if getattr(obj, "image", None):
-        return format_html('<img src="{}" style="height:50px;border-radius:4px;" />', obj.image.url)
+    image = getattr(obj, "image", None)
+    if image and image.name:
+        try:
+            image.open("rb")
+            return format_html('<img src="{}" style="height:50px;border-radius:4px;" />', image.url)
+        except (FileNotFoundError, OSError, ValueError):
+            return "—"
     return "—"
 
 

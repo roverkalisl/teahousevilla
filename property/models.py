@@ -83,6 +83,16 @@ class Property(models.Model):
     def hero_video_embed_url(self):
         return to_embed_url(self.hero_video_url) if self.hero_video_url else ""
 
+    @property
+    def hero_image_url(self):
+        if not self.hero_image:
+            return ""
+        try:
+            self.hero_image.open("rb")
+            return self.hero_image.url
+        except (FileNotFoundError, OSError, ValueError):
+            return ""
+
 
 class Facility(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -135,7 +145,14 @@ class Room(models.Model):
     @property
     def cover_image(self):
         cover = self.media.filter(active=True, media_type=Media.IMAGE, is_cover=True).first()
-        return cover or self.media.filter(active=True, media_type=Media.IMAGE).first()
+        candidate = cover or self.media.filter(active=True, media_type=Media.IMAGE).first()
+        if candidate and candidate.image:
+            try:
+                candidate.image.open("rb")
+                return candidate
+            except (FileNotFoundError, OSError, ValueError):
+                return None
+        return candidate if candidate and candidate.image else None
 
 
 class Media(models.Model):
@@ -176,22 +193,45 @@ class Media(models.Model):
 
     def save(self, *args, **kwargs):
         if self.media_type == self.IMAGE and self.image:
-            self._resize_image()
+            try:
+                self._resize_image()
+            except (FileNotFoundError, OSError, ValueError):
+                pass
         super().save(*args, **kwargs)
 
     def _resize_image(self):
         from PIL import Image
 
-        img = Image.open(self.image)
-        if img.width <= MAX_IMAGE_DIMENSION and img.height <= MAX_IMAGE_DIMENSION:
-            return
-        img.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.LANCZOS)
-        buffer = BytesIO()
-        img_format = (img.format or "JPEG")
-        if img.mode in ("RGBA", "P") and img_format == "JPEG":
-            img = img.convert("RGB")
-        img.save(buffer, format=img_format, quality=85, optimize=True)
-        self.image.save(self.image.name, ContentFile(buffer.getvalue()), save=False)
+        with Image.open(self.image) as img:
+            if img.width <= MAX_IMAGE_DIMENSION and img.height <= MAX_IMAGE_DIMENSION:
+                return
+            img.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.LANCZOS)
+            buffer = BytesIO()
+            img_format = (img.format or "JPEG")
+            if img.mode in ("RGBA", "P") and img_format == "JPEG":
+                img = img.convert("RGB")
+            img.save(buffer, format=img_format, quality=85, optimize=True)
+            self.image.save(self.image.name, ContentFile(buffer.getvalue()), save=False)
+
+    @property
+    def image_url(self):
+        if not self.image:
+            return ""
+        try:
+            self.image.open("rb")
+            return self.image.url
+        except (FileNotFoundError, OSError, ValueError):
+            return ""
+
+    @property
+    def exists_on_storage(self):
+        if not self.image:
+            return False
+        try:
+            self.image.open("rb")
+            return True
+        except (FileNotFoundError, OSError, ValueError):
+            return False
 
     @property
     def video_embed_url(self):

@@ -24,8 +24,11 @@ CSRF_TRUSTED_ORIGINS = env.list(
     default=["https://teahousevilla.onrender.com"],
 )
 
+CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
 
 INSTALLED_APPS = [
+    "cloudinary_storage",
+    "cloudinary",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -106,15 +109,23 @@ STORAGES = {
         ),
     },
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if CLOUDINARY_URL
+            else "django.core.files.storage.FileSystemStorage"
+        ),
     },
 }
 WHITENOISE_USE_FINDERS = DEBUG
 
-# Media files (villa photos/uploads) — local filesystem for dev.
-# Production should move this to a cloud media store (e.g. Cloudinary) per project spec.
-MEDIA_URL = "media/"
+# Media files
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+if CLOUDINARY_URL:
+    CLOUDINARY_STORAGE = {
+        "CLOUDINARY_URL": CLOUDINARY_URL,
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
