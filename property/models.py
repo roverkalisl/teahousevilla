@@ -11,6 +11,26 @@ from .utils import to_embed_url
 MAX_IMAGE_DIMENSION = 1920
 
 
+class GoogleMapsEmbedURLField(models.URLField):
+    """Accept a pasted Google Maps iframe snippet and normalize it to the src URL."""
+
+    def to_python(self, value):
+        if value is None:
+            return ""
+
+        if isinstance(value, str):
+            value = value.strip()
+            iframe_match = re.search(
+                r'<iframe[^>]*\s+src=["\']([^"\']+)["\']',
+                value,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            if iframe_match:
+                value = iframe_match.group(1)
+
+        return super().to_python(value)
+
+
 class Property(models.Model):
     """The villa itself. Singleton — only one row is expected to exist."""
 
@@ -23,7 +43,11 @@ class Property(models.Model):
 
     address = models.CharField(max_length=255, blank=True)
     google_maps_url = models.URLField(blank=True, help_text="Link used for the 'Get Directions' button.")
-    google_maps_embed_url = models.URLField(blank=True, max_length=500, help_text="Embed src URL for the map iframe.")
+    google_maps_embed_url = GoogleMapsEmbedURLField(
+        blank=True,
+        max_length=500,
+        help_text="Embed src URL for the map iframe.",
+    )
 
     max_guests = models.PositiveIntegerField(default=0)
     bedrooms = models.PositiveIntegerField(default=0)
@@ -195,23 +219,26 @@ class Media(models.Model):
         if self.media_type == self.IMAGE and self.image:
             try:
                 self._resize_image()
-            except (FileNotFoundError, OSError, ValueError):
-                pass
+            except (AttributeError, FileNotFoundError, OSError, TypeError, ValueError):
+                self.image = None
         super().save(*args, **kwargs)
 
     def _resize_image(self):
-        from PIL import Image
+        from PIL import Image, UnidentifiedImageError
 
-        with Image.open(self.image) as img:
-            if img.width <= MAX_IMAGE_DIMENSION and img.height <= MAX_IMAGE_DIMENSION:
-                return
-            img.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.LANCZOS)
-            buffer = BytesIO()
-            img_format = (img.format or "JPEG")
-            if img.mode in ("RGBA", "P") and img_format == "JPEG":
-                img = img.convert("RGB")
-            img.save(buffer, format=img_format, quality=85, optimize=True)
-            self.image.save(self.image.name, ContentFile(buffer.getvalue()), save=False)
+        try:
+            with Image.open(self.image) as img:
+                if img.width <= MAX_IMAGE_DIMENSION and img.height <= MAX_IMAGE_DIMENSION:
+                    return
+                img.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.LANCZOS)
+                buffer = BytesIO()
+                img_format = img.format or "JPEG"
+                if img.mode in ("RGBA", "P") and img_format == "JPEG":
+                    img = img.convert("RGB")
+                img.save(buffer, format=img_format, quality=85, optimize=True)
+                self.image.save(self.image.name, ContentFile(buffer.getvalue()), save=False)
+        except (UnidentifiedImageError, OSError, ValueError, TypeError):
+            raise
 
     @property
     def image_url(self):
