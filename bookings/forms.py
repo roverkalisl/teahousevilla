@@ -45,7 +45,10 @@ class BookingInquiryForm(forms.ModelForm):
         if check_in and check_out and check_out <= check_in:
             self.add_error("check_out", "Check-out date must be after check-in date.")
 
-        if check_in and check_out and check_in < datetime.date.today() or (check_in and check_out and check_out <= check_in):
+        if not check_in or not check_out:
+            return cleaned_data
+
+        if check_in < datetime.date.today() or check_out <= check_in:
             return cleaned_data
 
         property_obj = Property.objects.first()

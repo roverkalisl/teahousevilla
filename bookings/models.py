@@ -105,6 +105,15 @@ class BookingInquiry(models.Model):
     def whatsapp_contact_number(self):
         return self.whatsapp_number or self.phone
 
+    @property
+    def guest_count(self):
+        return self.adults + self.children
+
+    def export_to_connected_channels(self):
+        from .services import export_direct_booking_to_connected_channels
+
+        return export_direct_booking_to_connected_channels(self)
+
     @staticmethod
     def is_date_range_available(property_obj, check_in, check_out):
         if not property_obj or not check_in or not check_out:

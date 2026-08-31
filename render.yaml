@@ -16,3 +16,25 @@ services:
         value: "False"
       - key: SECRET_KEY
         generateValue: true
+      - key: OTA_SYNC_ENABLED
+        value: "False"
+      - key: OTA_EXPORT_ENABLED
+        value: "False"
+
+  - type: cron
+    name: teahousevilla-ota-sync
+    env: python
+    schedule: "*/15 * * * *"
+    buildCommand: >
+      pip install --upgrade pip &&
+      pip install -r requirements.txt
+    startCommand: python manage.py refresh_availability
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OTA_SYNC_ENABLED
+        value: "False"

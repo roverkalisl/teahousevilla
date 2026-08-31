@@ -25,6 +25,8 @@ CSRF_TRUSTED_ORIGINS = env.list(
 )
 
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
+OTA_SYNC_ENABLED = env.bool("OTA_SYNC_ENABLED", default=False)
+OTA_EXPORT_ENABLED = env.bool("OTA_EXPORT_ENABLED", default=False)
 
 INSTALLED_APPS = [
     "cloudinary_storage",
