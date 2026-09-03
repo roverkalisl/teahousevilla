@@ -16,6 +16,10 @@ services:
         value: "False"
       - key: SECRET_KEY
         generateValue: true
+      - key: ALLOWED_HOSTS
+        value: teahousevilla.onrender.com,teahousevillagalle.com,www.teahousevillagalle.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://teahousevilla.onrender.com,https://teahousevillagalle.com,https://www.teahousevillagalle.com
       - key: OTA_SYNC_ENABLED
         value: "False"
       - key: OTA_EXPORT_ENABLED

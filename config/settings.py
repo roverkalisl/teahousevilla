@@ -17,11 +17,21 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",
-    default=["localhost", "127.0.0.1", "teahousevilla.onrender.com"],
+    default=[
+        "localhost",
+        "127.0.0.1",
+        "teahousevilla.onrender.com",
+        "teahousevillagalle.com",
+        "www.teahousevillagalle.com",
+    ],
 )
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
-    default=["https://teahousevilla.onrender.com"],
+    default=[
+        "https://teahousevilla.onrender.com",
+        "https://teahousevillagalle.com",
+        "https://www.teahousevillagalle.com",
+    ],
 )
 
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
