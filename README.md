@@ -33,6 +33,32 @@ python manage.py runserver
 
 Visit http://127.0.0.1:8000/ for the site and http://127.0.0.1:8000/admin/ for the admin panel.
 
+The custom owner dashboard is available at http://127.0.0.1:8000/admin-login/.
+Sign in with an active Django staff user. OTA status is shown under Dashboard > Settings.
+
+## OTA availability status configuration
+
+The dashboard stores one `OTAAvailabilitySyncStatus` row per villa and source
+(`Airbnb` and `Booking.com`) with `last_synced_at`, `status`, `last_error`, and
+`updated_at`. Open `/admin-dashboard/settings/` and use **Sync now** to run the
+configured adapter, or run the scheduled command manually:
+
+```bash
+python manage.py sync_ota_availability
+```
+
+Set this Render environment variable to enable the adapter:
+
+```text
+OTA_SYNC_ENABLED=True
+```
+
+When it is `False`, a sync attempt is recorded as failed with a configuration
+message. The current adapter records sync health and provides the architecture
+for provider integration; it does not yet import Airbnb or Booking.com iCal
+events. Do not enable it as a claim of live OTA synchronization until official
+iCal/API credentials and import logic are configured.
+
 If you edit `templates/**/*.html` or `static_src/css/input.css`, rerun `npm run build-css`
 (or `npm run watch-css` while developing) to regenerate `static/css/tailwind.css` — that
 compiled file is committed so the site works without Node on a plain clone/deploy.

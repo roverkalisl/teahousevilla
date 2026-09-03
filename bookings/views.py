@@ -14,7 +14,7 @@ from property.models import Media, Price, Property
 
 from .forms import AdminLoginForm, BookingInquiryForm
 from .models import AvailabilityBlock, BookingInquiry, BookingNotification, OTAAvailabilitySyncStatus
-from .services import cancel_booking, confirm_booking, send_booking_cancellation, send_booking_confirmation
+from .services import cancel_booking, confirm_booking, send_booking_cancellation, send_booking_confirmation, sync_ota_source
 
 
 def admin_login(request):
@@ -231,4 +231,21 @@ def pricing(request):
 
 @_staff_required
 def settings_page(request):
-    return render(request, "admin_dashboard/settings.html", {"ota_statuses": OTAAvailabilitySyncStatus.objects.all(), "whatsapp_configured": bool(settings.WHATSAPP_ACCESS_TOKEN and settings.WHATSAPP_PHONE_NUMBER_ID), "email_configured": bool(settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD)})
+    site = Property.objects.first()
+    statuses = []
+    if site:
+        for source in (OTAAvailabilitySyncStatus.AIRBNB, OTAAvailabilitySyncStatus.BOOKING_COM):
+            status, _ = OTAAvailabilitySyncStatus.objects.get_or_create(villa=site, source=source)
+            statuses.append(status)
+    return render(request, "admin_dashboard/settings.html", {"ota_statuses": statuses, "whatsapp_configured": bool(settings.WHATSAPP_ACCESS_TOKEN and settings.WHATSAPP_PHONE_NUMBER_ID), "email_configured": bool(settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD), "ota_sync_enabled": settings.OTA_SYNC_ENABLED})
+
+
+@_staff_required
+def sync_ota(request, source):
+    if request.method != "POST":
+        return redirect("bookings:settings")
+    site = Property.objects.first()
+    if site and source in {OTAAvailabilitySyncStatus.AIRBNB, OTAAvailabilitySyncStatus.BOOKING_COM}:
+        sync_ota_source(site, source)
+        messages.success(request, f"{source.replace('_', ' ').title()} availability sync completed.")
+    return redirect("bookings:settings")

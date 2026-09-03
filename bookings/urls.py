@@ -15,6 +15,7 @@ urlpatterns = [
     path("admin-dashboard/gallery/", views.gallery, name="gallery_admin"),
     path("admin-dashboard/pricing/", views.pricing, name="pricing"),
     path("admin-dashboard/settings/", views.settings_page, name="settings"),
+    path("admin-dashboard/settings/ota/<str:source>/sync/", views.sync_ota, name="sync_ota"),
     path("", views.inquire, name="inquire"),
     path("success/<int:pk>/", views.inquiry_success, name="inquiry_success"),
     path("manage/", views.manage_bookings, name="manage_list"),
