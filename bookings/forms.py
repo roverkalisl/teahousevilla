@@ -1,12 +1,32 @@
 import datetime
 
 from django import forms
+from django.contrib.auth import authenticate, get_user_model
 
 from property.models import Property
 
 from .models import AvailabilityBlock, BookingInquiry
 
 INPUT_CLASSES = "input-field"
+
+
+class AdminLoginForm(forms.Form):
+    username = forms.CharField(label="Username or email", widget=forms.TextInput(attrs={"class": INPUT_CLASSES, "autocomplete": "username"}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={"class": INPUT_CLASSES, "autocomplete": "current-password"}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        identifier = cleaned_data.get("username")
+        password = cleaned_data.get("password")
+        user = authenticate(username=identifier, password=password)
+        if user is None and identifier:
+            account = get_user_model().objects.filter(email__iexact=identifier).first()
+            if account:
+                user = authenticate(username=account.get_username(), password=password)
+        if user is None or not user.is_active or not user.is_staff:
+            raise forms.ValidationError("Please enter valid administrator credentials.")
+        self.user = user
+        return cleaned_data
 
 
 class BookingInquiryForm(forms.ModelForm):
