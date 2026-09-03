@@ -37,6 +37,9 @@ CSRF_TRUSTED_ORIGINS = env.list(
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
 OTA_SYNC_ENABLED = env.bool("OTA_SYNC_ENABLED", default=False)
 OTA_EXPORT_ENABLED = env.bool("OTA_EXPORT_ENABLED", default=False)
+WHATSAPP_API_URL = env("WHATSAPP_API_URL", default="https://graph.facebook.com/v20.0")
+WHATSAPP_ACCESS_TOKEN = env("WHATSAPP_ACCESS_TOKEN", default="")
+WHATSAPP_PHONE_NUMBER_ID = env("WHATSAPP_PHONE_NUMBER_ID", default="")
 
 INSTALLED_APPS = [
     "cloudinary_storage",

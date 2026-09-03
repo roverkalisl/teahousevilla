@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.utils import timezone
 
 from property.models import Property
 
@@ -75,6 +76,17 @@ class OTAAvailabilitySyncStatus(models.Model):
 
 
 class BookingInquiry(models.Model):
+    STATUS_PENDING = "PENDING"
+    STATUS_CONFIRMED = "CONFIRMED"
+    STATUS_CANCELLED = "CANCELLED"
+    STATUS_CHOICES = [(value, value.title()) for value in (STATUS_PENDING, STATUS_CONFIRMED, STATUS_CANCELLED)]
+    SOURCE_WEBSITE = "WEBSITE"
+    SOURCE_AIRBNB = "AIRBNB"
+    SOURCE_BOOKING_COM = "BOOKING_COM"
+    SOURCE_MANUAL = "MANUAL"
+    SOURCE_CHOICES = [(value, value.replace("_", " ").title()) for value in (SOURCE_WEBSITE, SOURCE_AIRBNB, SOURCE_BOOKING_COM, SOURCE_MANUAL)]
+
+    booking_reference = models.CharField(max_length=20, unique=True, blank=True)
     full_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=30)
     whatsapp_number = models.CharField(max_length=30, blank=True, help_text="Leave blank to use the phone number.")
@@ -87,15 +99,19 @@ class BookingInquiry(models.Model):
     message = models.TextField(blank=True)
 
     estimated_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    booking_status = models.CharField(max_length=12, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    booking_source = models.CharField(max_length=12, choices=SOURCE_CHOICES, default=SOURCE_WEBSITE)
     contacted = models.BooleanField(default=False, help_text="Mark once the owner has followed up with the guest.")
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
         verbose_name_plural = "Booking Inquiries"
 
     def __str__(self):
-        return f"{self.full_name} — {self.check_in} to {self.check_out}"
+        return f"{self.booking_reference or 'New booking'} — {self.full_name}"
 
     @property
     def nights(self):
@@ -122,6 +138,7 @@ class BookingInquiry(models.Model):
             return False
 
         direct_conflicts = BookingInquiry.objects.filter(
+            booking_status=BookingInquiry.STATUS_CONFIRMED,
             check_in__lt=check_out,
             check_out__gt=check_in,
         )
@@ -148,6 +165,35 @@ class BookingInquiry(models.Model):
     def save(self, *args, **kwargs):
         if self.pk is None:
             property_obj = Property.objects.first()
-            if not BookingInquiry.is_date_range_available(property_obj, self.check_in, self.check_out):
+            if self.booking_status == self.STATUS_CONFIRMED and not BookingInquiry.is_date_range_available(property_obj, self.check_in, self.check_out):
                 raise ValueError("Selected dates are unavailable.")
+            if not self.booking_reference:
+                prefix = timezone.now().strftime("THV-%Y%m")
+                sequence = BookingInquiry.objects.filter(booking_reference__startswith=prefix).count() + 1
+                self.booking_reference = f"{prefix}-{sequence:03d}"
         super().save(*args, **kwargs)
+
+
+class BookingNotification(models.Model):
+    TYPE_CONFIRMED = "BOOKING_CONFIRMED"
+    TYPE_CANCELLED = "BOOKING_CANCELLED"
+    CHANNEL_WHATSAPP = "WHATSAPP"
+    STATUS_PENDING = "PENDING"
+    STATUS_SENT = "SENT"
+    STATUS_FAILED = "FAILED"
+
+    booking = models.ForeignKey(BookingInquiry, on_delete=models.CASCADE, related_name="notifications")
+    notification_type = models.CharField(max_length=30)
+    channel = models.CharField(max_length=20, default=CHANNEL_WHATSAPP)
+    recipient = models.CharField(max_length=30)
+    message = models.TextField()
+    message_status = models.CharField(max_length=10, default=STATUS_PENDING)
+    provider_response = models.TextField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.booking.booking_reference} — {self.notification_type} — {self.message_status}"

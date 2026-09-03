@@ -3,12 +3,15 @@ from urllib.parse import quote
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from property.models import Property
 
 from .forms import BookingInquiryForm
-from .models import BookingInquiry
+from .models import BookingInquiry, BookingNotification
+from .services import cancel_booking, confirm_booking, send_booking_cancellation, send_booking_confirmation
 
 
 def inquire(request):
@@ -27,6 +30,7 @@ def inquire(request):
                 nightly_rate = site.get_starting_price()
                 if nightly_rate:
                     inquiry.estimated_total = nightly_rate * inquiry.nights
+                    inquiry.total_amount = inquiry.estimated_total
             inquiry.save()
             _notify_owner(site, inquiry)
             return redirect("bookings:inquiry_success", pk=inquiry.pk)
@@ -80,3 +84,66 @@ def _notify_owner(site, inquiry):
         [site.email],
         fail_silently=True,
     )
+
+
+@staff_member_required
+def manage_bookings(request):
+    bookings = BookingInquiry.objects.all()
+    status = request.GET.get("status")
+    source = request.GET.get("source")
+    if status in {choice[0] for choice in BookingInquiry.STATUS_CHOICES}:
+        bookings = bookings.filter(booking_status=status)
+    if source in {choice[0] for choice in BookingInquiry.SOURCE_CHOICES}:
+        bookings = bookings.filter(booking_source=source)
+    if request.GET.get("period") == "upcoming":
+        bookings = bookings.filter(check_out__gte=datetime.date.today())
+    elif request.GET.get("period") == "past":
+        bookings = bookings.filter(check_out__lt=datetime.date.today())
+    return render(request, "bookings/manage_list.html", {"bookings": bookings, "active_status": status, "active_source": source, "booking_status_choices": BookingInquiry.STATUS_CHOICES, "booking_source_choices": BookingInquiry.SOURCE_CHOICES})
+
+
+@staff_member_required
+def booking_detail(request, pk):
+    booking = get_object_or_404(BookingInquiry, pk=pk)
+    return render(request, "bookings/manage_detail.html", {"booking": booking})
+
+
+@staff_member_required
+def booking_action(request, pk, action):
+    if request.method != "POST":
+        return redirect("bookings:manage_detail", pk=pk)
+    booking = get_object_or_404(BookingInquiry, pk=pk)
+    if action == "confirm":
+        try:
+            booking = confirm_booking(booking)
+            notification = send_booking_confirmation(booking)
+            if notification.message_status == BookingNotification.STATUS_FAILED:
+                messages.warning(request, "Booking confirmed successfully, but the WhatsApp notification failed.")
+            else:
+                messages.success(request, "Booking confirmed and WhatsApp notification sent.")
+        except ValueError as exc:
+            messages.error(request, str(exc))
+    elif action == "cancel":
+        booking = cancel_booking(booking)
+        notification = send_booking_cancellation(booking)
+        if notification.message_status == BookingNotification.STATUS_FAILED:
+            messages.warning(request, "Booking cancelled, but the WhatsApp notification failed.")
+        else:
+            messages.success(request, "Booking cancelled and WhatsApp notification sent.")
+    return redirect("bookings:manage_detail", pk=booking.pk)
+
+
+@staff_member_required
+def resend_notification(request, pk):
+    if request.method != "POST":
+        return redirect("bookings:manage_detail", pk=pk)
+    notification = get_object_or_404(BookingNotification, pk=pk)
+    if notification.notification_type == BookingNotification.TYPE_CONFIRMED:
+        result = send_booking_confirmation(notification.booking)
+    else:
+        result = send_booking_cancellation(notification.booking)
+    if result.message_status == BookingNotification.STATUS_SENT:
+        messages.success(request, "WhatsApp notification sent.")
+    else:
+        messages.error(request, "WhatsApp notification failed again.")
+    return redirect("bookings:manage_detail", pk=notification.booking_id)

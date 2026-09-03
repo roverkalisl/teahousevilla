@@ -1,4 +1,6 @@
 import datetime
+import json
+from urllib import error, request
 from typing import Any
 
 from django.conf import settings
@@ -6,7 +8,62 @@ from django.utils import timezone
 
 from property.models import Property
 
-from .models import AvailabilityBlock, BookingInquiry, OTAAvailabilitySyncStatus
+from .models import AvailabilityBlock, BookingInquiry, BookingNotification, OTAAvailabilitySyncStatus
+
+
+def confirm_booking(booking):
+    from django.db import transaction
+
+    with transaction.atomic():
+        locked = BookingInquiry.objects.select_for_update().get(pk=booking.pk)
+        property_obj = Property.objects.select_for_update().first()
+        if not BookingInquiry.is_date_range_available(property_obj, locked.check_in, locked.check_out):
+            raise ValueError("Unable to confirm this booking. The selected dates are no longer available.")
+        locked.booking_status = BookingInquiry.STATUS_CONFIRMED
+        locked.save(update_fields=["booking_status", "updated_at"])
+    return locked
+
+
+def cancel_booking(booking):
+    booking.booking_status = BookingInquiry.STATUS_CANCELLED
+    booking.save(update_fields=["booking_status", "updated_at"])
+    return booking
+
+
+def _send_whatsapp(booking, notification_type, message):
+    notification = BookingNotification.objects.create(booking=booking, notification_type=notification_type, recipient=booking.whatsapp_contact_number, message=message)
+    api_url = getattr(settings, "WHATSAPP_API_URL", "")
+    token = getattr(settings, "WHATSAPP_ACCESS_TOKEN", "")
+    phone_id = getattr(settings, "WHATSAPP_PHONE_NUMBER_ID", "")
+    if not api_url or not token or not phone_id:
+        notification.message_status = BookingNotification.STATUS_FAILED
+        notification.provider_response = "WhatsApp provider is not configured."
+        notification.save(update_fields=["message_status", "provider_response"])
+        return notification
+    payload = json.dumps({"messaging_product": "whatsapp", "to": notification.recipient, "type": "text", "text": {"body": message}}).encode()
+    try:
+        req = request.Request(f"{api_url.rstrip('/')}/{phone_id}/messages", data=payload, headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+        with request.urlopen(req, timeout=15) as response:
+            notification.provider_response = response.read().decode()
+        notification.message_status = BookingNotification.STATUS_SENT
+        notification.sent_at = timezone.now()
+        notification.save(update_fields=["message_status", "provider_response", "sent_at"])
+    except (error.HTTPError, error.URLError, TimeoutError, ValueError) as exc:
+        notification.message_status = BookingNotification.STATUS_FAILED
+        notification.provider_response = str(exc)
+        notification.save(update_fields=["message_status", "provider_response"])
+    return notification
+
+
+def send_booking_confirmation(booking):
+    message = (f"Tea House Villa\n\nDear {booking.full_name},\n\nYour booking has been CONFIRMED.\n\nBooking Reference: {booking.booking_reference}\n"
+               f"Check-in: {booking.check_in:%d %B %Y}\nCheck-out: {booking.check_out:%d %B %Y}\nGuests: {booking.guest_count}\n\nThank you for choosing Tea House Villa. We look forward to welcoming you!")
+    return _send_whatsapp(booking, BookingNotification.TYPE_CONFIRMED, message)
+
+
+def send_booking_cancellation(booking):
+    message = (f"Tea House Villa\n\nDear {booking.full_name},\n\nWe regret to inform you that your booking request has been cancelled.\n\nBooking Reference: {booking.booking_reference}\n\nPlease contact Tea House Villa if you require assistance.")
+    return _send_whatsapp(booking, BookingNotification.TYPE_CANCELLED, message)
 
 
 def _get_or_create_sync_status(villa: Property, source: str):

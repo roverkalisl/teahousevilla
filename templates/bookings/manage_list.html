@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Booking Management{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div><p class="eyebrow">Owner Dashboard</p><h1 class="mt-2 text-3xl font-bold text-forest">Bookings</h1></div>
+      <a href="{% url 'admin:index' %}" class="btn-secondary">Django Admin</a>
+    </div>
+    <form method="get" class="mt-8 flex flex-wrap gap-3 rounded-lg bg-white p-4 shadow-sm">
+      <select name="status" class="input-field w-auto"><option value="">All statuses</option>{% for value,label in booking_status_choices %}<option value="{{ value }}"{% if active_status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+      <select name="source" class="input-field w-auto"><option value="">All sources</option>{% for value,label in booking_source_choices %}<option value="{{ value }}"{% if active_source == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+      <select name="period" class="input-field w-auto"><option value="">All dates</option><option value="upcoming">Upcoming</option><option value="past">Past</option></select>
+      <button class="btn-primary" type="submit">Filter</button>
+    </form>
+    <div class="mt-6 overflow-x-auto rounded-lg bg-white shadow-sm"><table class="w-full text-left text-sm"><thead class="border-b border-forest/10 text-xs uppercase tracking-wide text-ink/60"><tr><th class="p-4">Reference</th><th class="p-4">Guest</th><th class="p-4">Stay</th><th class="p-4">Status</th><th class="p-4">Source</th><th class="p-4"></th></tr></thead><tbody>{% for booking in bookings %}<tr class="border-b border-forest/5"><td class="p-4 font-semibold text-forest">{{ booking.booking_reference }}</td><td class="p-4">{{ booking.full_name }}<br><span class="text-xs text-ink/60">{{ booking.email }}</span></td><td class="p-4">{{ booking.check_in|date:"d M Y" }} - {{ booking.check_out|date:"d M Y" }}</td><td class="p-4"><span class="badge">{{ booking.booking_status }}</span></td><td class="p-4">{{ booking.booking_source }}</td><td class="p-4 text-right"><a class="font-semibold text-forest hover:text-gold" href="{% url 'bookings:manage_detail' booking.pk %}">View</a></td></tr>{% empty %}<tr><td class="p-8 text-center text-ink/60" colspan="6">No bookings found.</td></tr>{% endfor %}</tbody></table></div>
+  </div>
+</section>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AvailabilityBlock, BookingInquiry, OTAAvailabilitySyncStatus
+from .models import AvailabilityBlock, BookingInquiry, BookingNotification, OTAAvailabilitySyncStatus
 
 
 @admin.register(AvailabilityBlock)
@@ -31,6 +31,7 @@ class OTAAvailabilitySyncStatusAdmin(admin.ModelAdmin):
 @admin.register(BookingInquiry)
 class BookingInquiryAdmin(admin.ModelAdmin):
     list_display = (
+        "booking_reference",
         "full_name",
         "check_in",
         "check_out",
@@ -40,9 +41,11 @@ class BookingInquiryAdmin(admin.ModelAdmin):
         "estimated_total",
         "contacted",
         "created_at",
+        "booking_status",
+        "booking_source",
     )
-    list_filter = ("contacted", "check_in")
-    search_fields = ("full_name", "email", "phone")
+    list_filter = ("booking_status", "booking_source", "contacted", "check_in")
+    search_fields = ("booking_reference", "full_name", "email", "phone")
     list_editable = ("contacted",)
     readonly_fields = (
         "full_name",
@@ -56,5 +59,23 @@ class BookingInquiryAdmin(admin.ModelAdmin):
         "guest_count",
         "message",
         "estimated_total",
+        "total_amount",
+        "booking_reference",
+        "booking_status",
+        "booking_source",
         "created_at",
+        "updated_at",
     )
+    fieldsets = (
+        (None, {"fields": ("booking_reference", "booking_status", "booking_source", "full_name", "phone", "whatsapp_number", "email")}),
+        ("Stay", {"fields": ("check_in", "check_out", "adults", "children", "message", "estimated_total", "total_amount")}),
+        ("Tracking", {"fields": ("contacted", "created_at", "updated_at")}),
+    )
+
+
+@admin.register(BookingNotification)
+class BookingNotificationAdmin(admin.ModelAdmin):
+    list_display = ("booking", "notification_type", "channel", "recipient", "message_status", "sent_at")
+    list_filter = ("notification_type", "message_status", "channel")
+    search_fields = ("booking__booking_reference", "recipient")
+    readonly_fields = [field.name for field in BookingNotification._meta.fields]
