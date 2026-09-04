@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -129,18 +130,31 @@ def manage_bookings(request):
     query = request.GET.get("q", "").strip()
     status = request.GET.get("status")
     source = request.GET.get("source")
+    period = request.GET.get("period", "")
+    check_in = request.GET.get("check_in", "")
+    check_out = request.GET.get("check_out", "")
     if status in {choice[0] for choice in BookingInquiry.STATUS_CHOICES}:
         bookings = bookings.filter(booking_status=status)
     if source in {choice[0] for choice in BookingInquiry.SOURCE_CHOICES}:
         bookings = bookings.filter(booking_source=source)
     if query:
         bookings = bookings.filter(Q(full_name__icontains=query) | Q(booking_reference__icontains=query))
-    if request.GET.get("period") == "upcoming":
+    if check_in:
+        try:
+            bookings = bookings.filter(check_in__gte=datetime.date.fromisoformat(check_in))
+        except ValueError:
+            check_in = ""
+    if check_out:
+        try:
+            bookings = bookings.filter(check_out__lte=datetime.date.fromisoformat(check_out))
+        except ValueError:
+            check_out = ""
+    if period == "upcoming":
         bookings = bookings.filter(check_out__gte=datetime.date.today())
-    elif request.GET.get("period") == "past":
+    elif period == "past":
         bookings = bookings.filter(check_out__lt=datetime.date.today())
     page = Paginator(bookings.order_by("-created_at"), 10).get_page(request.GET.get("page"))
-    return render(request, "admin_dashboard/bookings/booking_list.html", {"bookings": page, "active_status": status, "active_source": source, "query": query, "booking_status_choices": BookingInquiry.STATUS_CHOICES, "booking_source_choices": BookingInquiry.SOURCE_CHOICES})
+    return render(request, "admin_dashboard/bookings/booking_list.html", {"bookings": page, "active_status": status, "active_source": source, "active_period": period, "query": query, "check_in": check_in, "check_out": check_out, "booking_status_choices": BookingInquiry.STATUS_CHOICES, "booking_source_choices": BookingInquiry.SOURCE_CHOICES})
 
 
 @_staff_required
@@ -199,8 +213,27 @@ def calendar(request):
     except (TypeError, ValueError):
         month_date = datetime.date.today().replace(day=1)
     month_end = month_date.replace(day=28) + datetime.timedelta(days=4)
-    blocks = AvailabilityBlock.objects.filter(active=True, start_date__lt=month_end, end_date__gt=month_date)
+    site = Property.objects.first()
+    blocks = AvailabilityBlock.objects.filter(villa=site, active=True, start_date__lt=month_end, end_date__gt=month_date) if site else AvailabilityBlock.objects.none()
     bookings = BookingInquiry.objects.filter(check_in__lt=month_end, check_out__gt=month_date).exclude(booking_status=BookingInquiry.STATUS_CANCELLED)
+    if request.method == "POST" and site:
+        action = request.POST.get("action")
+        if action == "create_block":
+            try:
+                start_date = datetime.date.fromisoformat(request.POST["start_date"])
+                end_date = datetime.date.fromisoformat(request.POST["end_date"])
+                if end_date <= start_date:
+                    raise ValueError
+                AvailabilityBlock.objects.create(villa=site, source=AvailabilityBlock.MANUAL, start_date=start_date, end_date=end_date, notes=request.POST.get("notes", "").strip())
+                messages.success(request, "Dates blocked successfully.")
+            except (KeyError, ValueError):
+                messages.error(request, "Enter a valid date range with an end date after the start date.")
+        elif action == "release_block":
+            block = get_object_or_404(AvailabilityBlock, pk=request.POST.get("block_id"), villa=site, source=AvailabilityBlock.MANUAL)
+            block.active = False
+            block.save(update_fields=("active", "updated_at"))
+            messages.success(request, "Blocked dates released.")
+        return redirect(f"{request.path}?month={month_date:%Y-%m}")
     return render(request, "admin_dashboard/calendar.html", {"month_date": month_date, "blocks": blocks, "bookings": bookings})
 
 
@@ -220,12 +253,46 @@ def villa_info(request):
 @_staff_required
 def gallery(request):
     site = Property.objects.first()
+    if request.method == "POST" and site:
+        action = request.POST.get("action")
+        if action == "upload":
+            image = request.FILES.get("image")
+            if image:
+                Media.objects.create(villa=site, image=image, caption=request.POST.get("caption", "").strip(), category=request.POST.get("category", Media.CATEGORY_CHOICES[0][0]), display_order=request.POST.get("display_order") or 0, is_cover=request.POST.get("is_cover") == "on")
+                messages.success(request, "Photo uploaded.")
+            else:
+                messages.error(request, "Choose a photo to upload.")
+        elif action == "delete":
+            item = get_object_or_404(Media, pk=request.POST.get("media_id"), villa=site)
+            item.delete()
+            messages.success(request, "Photo deleted.")
+        return redirect("bookings:gallery_admin")
     return render(request, "admin_dashboard/gallery.html", {"media_items": Media.objects.filter(villa=site).order_by("display_order", "id") if site else []})
 
 
 @_staff_required
 def pricing(request):
     site = Property.objects.first()
+    if request.method == "POST" and site:
+        action = request.POST.get("action")
+        if action == "save":
+            price = get_object_or_404(Price, pk=request.POST.get("price_id"), villa=site) if request.POST.get("price_id") else Price(villa=site)
+            price.price_type = request.POST.get("price_type", Price.STANDARD)
+            price.amount = request.POST.get("amount")
+            price.start_date = request.POST.get("start_date") or None
+            price.end_date = request.POST.get("end_date") or None
+            price.notes = request.POST.get("notes", "").strip()
+            price.active = request.POST.get("active") == "on"
+            try:
+                price.full_clean()
+                price.save()
+                messages.success(request, "Price saved.")
+            except (TypeError, ValueError, ValidationError):
+                messages.error(request, "Enter a valid price.")
+        elif action == "delete":
+            get_object_or_404(Price, pk=request.POST.get("price_id"), villa=site).delete()
+            messages.success(request, "Price deleted.")
+        return redirect("bookings:pricing")
     return render(request, "admin_dashboard/pricing.html", {"prices": Price.objects.filter(villa=site) if site else []})
 
 

@@ -75,6 +75,49 @@ class OTAAvailabilitySyncStatus(models.Model):
         return f"{self.get_source_display()} — {self.get_status_display()}"
 
 
+class CalendarSync(models.Model):
+    AIRBNB = "AIRBNB"
+    BOOKING_COM = "BOOKING_COM"
+    PLATFORM_CHOICES = [(AIRBNB, "Airbnb"), (BOOKING_COM, "Booking.com")]
+    STATUS_PENDING = "PENDING"
+    STATUS_SUCCESS = "SUCCESS"
+    STATUS_FAILED = "FAILED"
+    STATUS_CHOICES = [(STATUS_PENDING, "Pending"), (STATUS_SUCCESS, "Success"), (STATUS_FAILED, "Failed")]
+
+    villa = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="calendar_syncs")
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
+    ical_url = models.URLField(blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+    last_sync_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    last_error = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=("villa", "platform"), name="unique_calendar_sync_platform")]
+
+    def __str__(self):
+        return f"{self.villa} — {self.get_platform_display()}"
+
+
+class ExternalCalendarEvent(models.Model):
+    PLATFORM_CHOICES = CalendarSync.PLATFORM_CHOICES
+
+    villa = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="external_calendar_events")
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
+    external_event_id = models.CharField(max_length=255)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    summary = models.CharField(max_length=255, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=("villa", "platform", "external_event_id"), name="unique_external_calendar_event")]
+        ordering = ["start_date", "end_date"]
+
+    def __str__(self):
+        return f"{self.get_platform_display()} — {self.start_date} to {self.end_date}"
+
+
 class BookingInquiry(models.Model):
     STATUS_PENDING = "PENDING"
     STATUS_CONFIRMED = "CONFIRMED"

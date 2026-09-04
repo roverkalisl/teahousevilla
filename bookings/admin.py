@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AvailabilityBlock, BookingInquiry, BookingNotification, OTAAvailabilitySyncStatus
+from .models import AvailabilityBlock, BookingInquiry, BookingNotification, CalendarSync, ExternalCalendarEvent, OTAAvailabilitySyncStatus
 
 
 @admin.register(AvailabilityBlock)
@@ -26,6 +26,20 @@ class OTAAvailabilitySyncStatusAdmin(admin.ModelAdmin):
 
         for status in queryset:
             sync_ota_source(status.villa, status.source)
+
+
+@admin.register(CalendarSync)
+class CalendarSyncAdmin(admin.ModelAdmin):
+    list_display = ("villa", "platform", "is_active", "last_sync_status", "last_synced_at")
+    list_filter = ("platform", "is_active", "last_sync_status")
+    search_fields = ("villa__name", "ical_url", "last_error")
+
+
+@admin.register(ExternalCalendarEvent)
+class ExternalCalendarEventAdmin(admin.ModelAdmin):
+    list_display = ("villa", "platform", "external_event_id", "start_date", "end_date", "last_synced_at")
+    list_filter = ("platform", "villa")
+    search_fields = ("external_event_id", "summary", "villa__name")
 
 
 @admin.register(BookingInquiry)

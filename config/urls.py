@@ -2,12 +2,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("property.urls")),
-    path("", include("bookings.urls")),
-    path("booking/", include(("bookings.urls", "bookings_legacy"), namespace="bookings_legacy")),
+    path("booking/", include(("bookings.urls", "bookings"), namespace="bookings")),
+    path("bookings/", RedirectView.as_view(pattern_name="bookings:inquire", permanent=False)),
 ]
 
 if settings.DEBUG:

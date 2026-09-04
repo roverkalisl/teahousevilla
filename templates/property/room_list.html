@@ -19,7 +19,7 @@
         <div class="p-6">
           <h2 class="text-lg font-semibold text-forest">{{ room.name }}</h2>
           <p class="mt-1 text-sm text-ink/60">{{ room.bed_type }} &middot; Sleeps {{ room.capacity }}{% if room.has_ac %} &middot; AC{% endif %}</p>
-          <p class="mt-3 text-sm text-ink/70">{{ room.description|truncatewords:20 }}</p>
+          <p class="mt-3 text-sm text-ink/70">{% if room.description|length > 3 %}{{ room.description|truncatewords:20 }}{% else %}A comfortable private room at Tea House Villa.{% endif %}</p>
           <a href="{{ room.get_absolute_url }}" class="btn-outline-dark mt-4">View Room</a>
         </div>
       </div>

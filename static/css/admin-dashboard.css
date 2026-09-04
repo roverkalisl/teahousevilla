@@ -9,3 +9,15 @@
 .filters { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; } .filters input,.filters select,.form-control { background:white; border:1px solid var(--line); border-radius:6px; color:var(--ink); padding:11px 12px; } .filters input { min-width:240px; } .button { background:var(--green); border:0; border-radius:6px; color:white; cursor:pointer; display:inline-block; font-weight:700; padding:11px 16px; text-decoration:none; } .button.secondary { background:white; border:1px solid var(--line); color:var(--navy); } .button.danger { background:var(--red); } .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px 30px; } .detail-grid dt { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.1em; } .detail-grid dd { margin:4px 0 0; } .action-row { border-top:1px solid var(--line); display:flex; gap:10px; margin-top:25px; padding-top:20px; }
 .login-page { align-items:center; background:var(--navy); display:flex; justify-content:center; min-height:100vh; padding:20px; } .login-card { background:white; border-radius:12px; max-width:420px; padding:42px; width:100%; } .login-card h1 { color:var(--navy); font:600 31px Fraunces,serif; margin:5px 0 8px; } .login-card label { display:block; font-weight:700; margin:18px 0 6px; } .login-card .button { margin-top:22px; width:100%; }
 @media(max-width:900px){ .stats-grid{grid-template-columns:repeat(3,1fr)} } @media(max-width:700px){ .admin-sidebar{display:none; position:fixed; inset:0 auto 0 0; z-index:4}.admin-sidebar.open{display:flex}.menu-button{display:block}.admin-topbar{padding:0 18px}.admin-content{padding:25px 16px 40px}.stats-grid{grid-template-columns:repeat(2,1fr)}.admin-table{min-width:720px}.admin-panel.table-panel{overflow:auto}.detail-grid{grid-template-columns:1fr}.filters input{min-width:0;width:100%}.filters{display:grid;grid-template-columns:1fr}.filters .button{width:100%}.login-card{padding:30px 24px} }
+.detail-grid label { display:grid; gap:6px; font-weight:700; }
+.detail-grid .full-width { grid-column:1 / -1; }
+.legend { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px; }
+.calendar-row { align-items:center; border-bottom:1px solid var(--line); display:flex; gap:12px; justify-content:space-between; }
+.calendar-row p { flex:1; }
+.badge.ota-airbnb { background:#e2e8fb; color:#3d579b; }
+.badge.ota-booking { background:#ffe3c8; color:#9b5b1d; }
+.badge.manual { background:#e4e5e5; color:#394244; }
+.media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:15px; }
+.media-thumb { height:100px; object-fit:cover; border-radius:6px; width:100%; }
+.pagination { display:flex; gap:15px; padding-top:20px; }
+.pagination a { color:var(--green); font-weight:700; text-decoration:none; }
