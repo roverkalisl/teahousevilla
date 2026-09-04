@@ -5,24 +5,25 @@
 {% block content %}
 <section class="section">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mb-10 text-center">
+    <div class="mb-12 max-w-2xl">
       <p class="eyebrow">Gallery</p>
-      <h1 class="mt-2 text-4xl font-bold text-forest md:text-5xl">Photos &amp; Videos</h1>
+      <h1 class="editorial-title mt-5">A glimpse of the villa.</h1>
+      <p class="editorial-copy mt-5">Light, water, tea country and the spaces in between.</p>
     </div>
 
     {% if images %}
     <div id="galleryFilters" class="mb-8 flex flex-wrap justify-center gap-2">
-      <button type="button" class="rounded-full bg-forest px-4 py-2 text-sm font-medium text-white" data-filter="all">All</button>
+      <button type="button" class="btn-primary px-5 py-3" data-filter="all">All</button>
       {% for value, label in categories %}
-      <button type="button" class="rounded-full bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-forest hover:text-white" data-filter="{{ value }}">{{ label }}</button>
+      <button type="button" class="btn-outline-dark bg-transparent px-5 py-3" data-filter="{{ value }}">{{ label }}</button>
       {% endfor %}
     </div>
 
     <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
       {% for item in images %}
-      <div class="gallery-cell" data-category="{{ item.category }}">
-        <div class="aspect-square overflow-hidden rounded-lg">
-          <img src="{{ item.image.url }}" alt="{{ item.caption|default:property.name }}" class="h-full w-full object-cover transition duration-300 hover:scale-105">
+      <div class="gallery-cell reveal" data-category="{{ item.category }}" data-lightbox-src="{{ item.image.url }}" data-lightbox-alt="{{ item.caption|default:property.name }}">
+        <div class="image-frame aspect-square">
+          <img src="{{ item.image.url }}" alt="{{ item.caption|default:property.name }}" class="h-full w-full object-cover" loading="lazy">
         </div>
         {% if item.caption %}<p class="mt-1 text-xs text-ink/50">{{ item.caption }}</p>{% endif %}
       </div>

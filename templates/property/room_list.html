@@ -6,21 +6,22 @@
 {% block content %}
 <section class="section">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mb-12 text-center">
+    <div class="mb-14 max-w-2xl">
       <p class="eyebrow">Accommodation</p>
-      <h1 class="mt-2 text-4xl font-bold text-forest md:text-5xl">Rooms &amp; Suites</h1>
+      <h1 class="editorial-title mt-5">Rooms with room to breathe.</h1>
+      <p class="editorial-copy mt-5">Private spaces shaped by natural light, thoughtful details and the quiet rhythm of the south.</p>
     </div>
 
     {% if rooms %}
     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {% for room in rooms %}
-      <div class="card">
-        {% if room.cover_image %}<img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}" class="h-56 w-full object-cover">{% else %}<img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}" class="h-56 w-full object-cover">{% endif %}
+      <div class="room-card reveal">
+        <div class="room-photo">{% if room.cover_image %}<img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}" loading="lazy">{% else %}<img src="{% static 'img/room-placeholder.jpg' %}" alt="{{ room.name }}">{% endif %}</div>
         <div class="p-6">
-          <h2 class="text-lg font-semibold text-forest">{{ room.name }}</h2>
-          <p class="mt-1 text-sm text-ink/60">{{ room.bed_type }} &middot; Sleeps {{ room.capacity }}{% if room.has_ac %} &middot; AC{% endif %}</p>
-          <p class="mt-3 text-sm text-ink/70">{% if room.description|length > 3 %}{{ room.description|truncatewords:20 }}{% else %}A comfortable private room at Tea House Villa.{% endif %}</p>
-          <a href="{{ room.get_absolute_url }}" class="btn-outline-dark mt-4">View Room</a>
+          <h2>{{ room.name }}</h2>
+          <p class="mt-2 text-sm leading-6 text-ink/65">{% if room.description|length > 3 %}{{ room.description|truncatewords:20 }}{% else %}A comfortable private room at Tea House Villa.{% endif %}</p>
+          <div class="room-data mt-5 flex flex-wrap gap-x-5 gap-y-2 pt-4"><span>{{ room.capacity }} guests</span><span>{{ room.bed_type }}</span>{% if room.has_ac %}<span>AC</span>{% endif %}</div>
+          <a href="{{ room.get_absolute_url }}" class="btn-outline-dark mt-6 inline-flex px-5 py-3">View details <span aria-hidden="true">&#8594;</span></a>
         </div>
       </div>
       {% endfor %}

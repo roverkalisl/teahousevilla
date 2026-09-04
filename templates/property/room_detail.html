@@ -6,7 +6,7 @@
 {% block content %}
 <section class="section">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <nav class="mb-8 text-sm"><a href="{% url 'property:room_list' %}" class="text-forest hover:text-gold">&larr; All Rooms</a></nav>
+    <nav class="mb-8 text-xs font-bold uppercase tracking-[.16em]"><a href="{% url 'property:room_list' %}" class="text-forest hover:text-gold">&larr; All rooms</a></nav>
 
     <div class="grid gap-10 lg:grid-cols-5">
       <div class="lg:col-span-3">
@@ -25,14 +25,14 @@
         {% endif %}
       </div>
       <div class="lg:col-span-2">
-        <h1 class="text-3xl font-bold text-forest">{{ room.name }}</h1>
+          <h1 class="editorial-title">{{ room.name }}</h1>
         <div class="mt-4 flex flex-wrap gap-3">
           <span class="pill text-sm"><i class="bi bi-people text-gold"></i>Sleeps {{ room.capacity }}</span>
           {% if room.bed_type %}<span class="pill text-sm"><i class="bi bi-house-door text-gold"></i>{{ room.bed_type }}</span>{% endif %}
           {% if room.has_ac %}<span class="pill text-sm"><i class="bi bi-snow text-gold"></i>AC</span>{% endif %}
           {% if room.bathroom_info %}<span class="pill text-sm"><i class="bi bi-droplet text-gold"></i>{{ room.bathroom_info }}</span>{% endif %}
         </div>
-        <p class="mt-5 text-ink/75">{% if room.description|length > 3 %}{{ room.description }}{% else %}A comfortable private room at Tea House Villa.{% endif %}</p>
+        <p class="editorial-copy mt-6">{% if room.description|length > 3 %}{{ room.description }}{% else %}A comfortable private room at Tea House Villa.{% endif %}</p>
 
         {% if room.facilities.all %}
         <h3 class="mt-6 mb-2 text-sm font-semibold text-forest">Room Facilities</h3>

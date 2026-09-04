@@ -12,37 +12,38 @@
 {% if site_property.hero_image %}<meta property="og:image" content="{{ site_property.hero_image.url }}">{% endif %}
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+<link rel="stylesheet" href="{% static 'css/frontend.css' %}">
 {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-cream text-ink font-sans">
 
-<nav x-data="" class="sticky top-0 z-50 border-b border-forest/10 bg-cream/95 backdrop-blur">
-  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-    <a href="{% url 'property:home' %}" class="font-display text-xl font-bold text-forest">{{ site_property.name|default:"Villa" }}</a>
+<nav id="siteNav" class="site-nav">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
+    <a href="{% url 'property:home' %}" class="brand">{{ site_property.name|default:"Tea House Villa" }}</a>
 
     <div class="hidden items-center gap-8 lg:flex">
-      <a href="{% url 'property:home' %}" class="text-sm font-medium text-ink hover:text-gold">Home</a>
-      <a href="{% url 'property:about' %}" class="text-sm font-medium text-ink hover:text-gold">About</a>
-      <a href="{% url 'property:room_list' %}" class="text-sm font-medium text-ink hover:text-gold">Rooms</a>
-      <a href="{% url 'property:gallery' %}" class="text-sm font-medium text-ink hover:text-gold">Gallery</a>
-      <a href="{% url 'property:contact' %}" class="text-sm font-medium text-ink hover:text-gold">Contact</a>
+      <a href="{% url 'property:home' %}" class="nav-link">Home</a>
+      <a href="{% url 'property:about' %}" class="nav-link">The Villa</a>
+      <a href="{% url 'property:room_list' %}" class="nav-link">Accommodation</a>
+      <a href="{% url 'property:gallery' %}" class="nav-link">Gallery</a>
+      <a href="{% url 'property:contact' %}" class="nav-link">Location</a>
       <a href="{% url 'bookings_public:inquire' %}" class="btn-primary">Book Now</a>
     </div>
 
-    <button id="navToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" class="flex h-10 w-10 items-center justify-center rounded text-forest lg:hidden">
+    <button id="navToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" class="flex h-10 w-10 items-center justify-center text-current lg:hidden">
       <i class="bi bi-list text-2xl"></i>
     </button>
   </div>
 
-  <div id="mobileNav" class="hidden flex-col gap-1 border-t border-forest/10 bg-cream px-6 py-4 lg:hidden">
-    <a href="{% url 'property:home' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Home</a>
-    <a href="{% url 'property:about' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">About</a>
-    <a href="{% url 'property:room_list' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Rooms</a>
-    <a href="{% url 'property:gallery' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Gallery</a>
-    <a href="{% url 'property:contact' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Contact</a>
+  <div id="mobileNav" class="mobile-nav hidden flex-col gap-1 border-t border-white/10 px-6 py-5 lg:hidden">
+    <a href="{% url 'property:home' %}" class="nav-link py-2">Home</a>
+    <a href="{% url 'property:about' %}" class="nav-link py-2">The Villa</a>
+    <a href="{% url 'property:room_list' %}" class="nav-link py-2">Accommodation</a>
+    <a href="{% url 'property:gallery' %}" class="nav-link py-2">Gallery</a>
+    <a href="{% url 'property:contact' %}" class="nav-link py-2">Location</a>
     <a href="{% url 'bookings_public:inquire' %}" class="btn-primary mt-2 justify-center">Book Now</a>
   </div>
 </nav>
@@ -55,7 +56,7 @@
   <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
     <div class="grid gap-10 lg:grid-cols-3">
       <div>
-        <h5 class="font-display text-lg text-white">{{ site_property.name|default:"Villa" }}</h5>
+        <h5 class="font-display text-3xl text-white">{{ site_property.name|default:"Tea House Villa" }}</h5>
         <p class="mt-2 text-white/60">{{ site_property.tagline }}</p>
         <div class="mt-4 flex gap-4 text-lg">
           {% if site_property.facebook_url %}<a href="{{ site_property.facebook_url }}" target="_blank" rel="noopener" class="hover:text-gold" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
