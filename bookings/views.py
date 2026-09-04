@@ -71,7 +71,7 @@ def inquire(request):
                     inquiry.total_amount = inquiry.estimated_total
             inquiry.save()
             _notify_owner(site, inquiry)
-            return redirect("bookings:inquiry_success", pk=inquiry.pk)
+            return redirect("bookings_public:inquiry_success", pk=inquiry.pk)
     else:
         form = BookingInquiryForm(initial=initial)
 

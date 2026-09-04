@@ -44,7 +44,7 @@
         {% endif %}
 
         <div class="mt-8 flex flex-wrap gap-4">
-          <a href="{% url 'bookings:inquire' %}" class="btn-primary">Check Availability</a>
+          <a href="{% url 'bookings_public:inquire' %}" class="btn-primary">Check Availability</a>
           {% if property.whatsapp_link %}<a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn-outline-dark"><i class="bi bi-whatsapp"></i>WhatsApp</a>{% endif %}
         </div>
       </div>

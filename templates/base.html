@@ -29,7 +29,7 @@
       <a href="{% url 'property:room_list' %}" class="text-sm font-medium text-ink hover:text-gold">Rooms</a>
       <a href="{% url 'property:gallery' %}" class="text-sm font-medium text-ink hover:text-gold">Gallery</a>
       <a href="{% url 'property:contact' %}" class="text-sm font-medium text-ink hover:text-gold">Contact</a>
-      <a href="{% url 'bookings:inquire' %}" class="btn-primary">Book Now</a>
+      <a href="{% url 'bookings_public:inquire' %}" class="btn-primary">Book Now</a>
     </div>
 
     <button id="navToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" class="flex h-10 w-10 items-center justify-center rounded text-forest lg:hidden">
@@ -43,7 +43,7 @@
     <a href="{% url 'property:room_list' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Rooms</a>
     <a href="{% url 'property:gallery' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Gallery</a>
     <a href="{% url 'property:contact' %}" class="rounded px-2 py-2 text-ink hover:bg-forest/5">Contact</a>
-    <a href="{% url 'bookings:inquire' %}" class="btn-primary mt-2 justify-center">Book Now</a>
+    <a href="{% url 'bookings_public:inquire' %}" class="btn-primary mt-2 justify-center">Book Now</a>
   </div>
 </nav>
 
@@ -76,7 +76,7 @@
           <li><a href="{% url 'property:about' %}" class="hover:text-gold">About the Villa</a></li>
           <li><a href="{% url 'property:room_list' %}" class="hover:text-gold">Rooms</a></li>
           <li><a href="{% url 'property:gallery' %}" class="hover:text-gold">Gallery</a></li>
-          <li><a href="{% url 'bookings:inquire' %}" class="hover:text-gold">Check Availability</a></li>
+          <li><a href="{% url 'bookings_public:inquire' %}" class="hover:text-gold">Check Availability</a></li>
         </ul>
       </div>
       <div>
