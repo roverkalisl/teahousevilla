@@ -1,14 +1,14 @@
 :root {
-  --villa-forest: #17382f;
+  --villa-forest: #1f3a2e;
   --villa-deep: #102a23;
-  --villa-leaf: #55745b;
-  --villa-brass: #c7a267;
-  --villa-cream: #f5f1e8;
+  --villa-leaf: #6f7f5b;
+  --villa-brass: #b89b5e;
+  --villa-cream: #f7f4ed;
   --villa-paper: #fbfaf6;
   --villa-charcoal: #26312c;
   --villa-line: rgba(23, 56, 47, .16);
   --villa-display: "Cormorant Garamond", Georgia, serif;
-  --villa-body: "Manrope", "Segoe UI", sans-serif;
+  --villa-body: "Inter", "Segoe UI", sans-serif;
 }
 
 html { scroll-behavior: smooth; }
@@ -60,6 +60,12 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
 .room-card h3 { font-size: 2rem; color: var(--villa-forest); }
 .room-card .room-data { border-top: 1px solid var(--villa-line); color: rgba(38,49,44,.65); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
 
+.review-score { border-left: 1px solid var(--villa-line); padding-left: clamp(2rem, 6vw, 6rem); }
+.review-stars { color: var(--villa-brass); font-size: 1.25rem; letter-spacing: .16em; }
+.review-rating { color: var(--villa-forest); font-family: var(--villa-display); font-size: clamp(3.5rem, 7vw, 5.5rem); line-height: .9; }
+.review-rating span { font-family: var(--villa-body); font-size: .9rem; letter-spacing: .08em; }
+.review-count { color: rgba(51,51,51,.68); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+
 .gallery-cell { cursor: zoom-in; }
 .gallery-cell.is-hidden { display: none; }
 .gallery-cell img { transition: transform .6s ease, filter .6s ease; }
@@ -78,6 +84,7 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
   .hero-content { padding-bottom: 5rem; }
   .hero-title { font-size: clamp(3.4rem, 18vw, 5rem); }
   .feature-card { min-height: 17rem; }
+  .review-score { border-left: 0; border-top: 1px solid var(--villa-line); padding-left: 0; padding-top: 2rem; width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
