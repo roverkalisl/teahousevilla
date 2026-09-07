@@ -21,22 +21,28 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
   z-index: 50;
   color: white;
   transition: background .35s cubic-bezier(.2,.65,.2,1), color .35s ease, box-shadow .35s ease;
-  background: rgba(16, 42, 35, .05);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background: rgba(16, 42, 35, .4);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
 }
 
 .site-nav.is-scrolled {
   background: rgba(251, 250, 246, .98);
   color: var(--villa-forest);
-  box-shadow: 0 4px 12px rgba(31, 58, 46, .1);
+  box-shadow: 0 4px 12px rgba(31, 58, 46, .15);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
 
+.site-nav.is-scrolled .brand {
+  color: var(--villa-forest);
+  text-shadow: none;
+}
+
 .site-nav .nav-link {
   color: inherit;
-  opacity: .88;
+  opacity: 1;
   font-size: .69rem;
   font-weight: 700;
   letter-spacing: .16em;
@@ -67,11 +73,13 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
 }
 
 .site-nav .brand {
-  color: inherit;
+  color: white;
   font-family: var(--villa-display);
   font-size: 1.45rem;
   letter-spacing: .06em;
   transition: transform .3s ease;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, .2);
 }
 
 .site-nav .brand:hover {
