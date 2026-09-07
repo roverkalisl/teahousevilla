@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Gallery — {{ property.name|default:"Villa" }}{% endblock %}
 {% block meta_description %}Browse photos and videos of {{ property.name }}.{% endblock %}
 
@@ -12,13 +13,15 @@
     </div>
 
     {% if images %}
-    <div id="galleryFilters" class="mb-8 flex flex-wrap justify-center gap-2">
-      <button type="button" class="btn-primary px-5 py-3" data-filter="all">All</button>
+    <!-- Gallery Filters -->
+    <div class="gallery-filters mb-12">
+      <button type="button" class="gallery-filter active" data-filter="all">All</button>
       {% for value, label in categories %}
-      <button type="button" class="btn-outline-dark bg-transparent px-5 py-3" data-filter="{{ value }}">{{ label }}</button>
+      <button type="button" class="gallery-filter" data-filter="{{ value }}">{{ label }}</button>
       {% endfor %}
     </div>
 
+    <!-- Gallery Grid -->
     <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
       {% for item in images %}
       <div class="gallery-cell reveal" data-category="{{ item.category }}" data-lightbox-src="{{ item.image.url }}" data-lightbox-alt="{{ item.caption|default:property.name }}">
@@ -28,7 +31,7 @@
         {% if item.caption %}<p class="mt-1 text-xs text-ink/50">{{ item.caption }}</p>{% endif %}
       </div>
       {% endfor %}
-    </div>
+    </div>{% endif %}
     {% else %}
     <p class="text-center text-ink/60">Photos coming soon.</p>
     {% endif %}
@@ -55,4 +58,8 @@
   </div>
 </section>
 {% endif %}
+
+{% block extra_js %}
+<script src="{% static 'js/gallery.js' %}"></script>
+{% endblock %}
 {% endblock %}

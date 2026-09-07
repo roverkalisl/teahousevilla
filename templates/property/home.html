@@ -194,11 +194,111 @@
 </section>
 {% endif %}
 
-<section class="section">
-  <div class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-2 lg:items-center lg:px-8">
-    <div>
-      <p class="eyebrow">Location</p>
-      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Find Us</h2>
+<!-- Infinity Pool Section -->
+<section class="section pool-section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="pool-content grid gap-10 lg:grid-cols-2 lg:items-center">
+      <div class="reveal">
+        <h2 class="pool-heading">Swim Into Serenity</h2>
+        <p class="pool-tagline">Relax. Refresh. Reconnect.</p>
+        <p class="text-white opacity-90 mt-4 text-lg">Experience our stunning private infinity pool with panoramic nature views. A perfect sanctuary for unwinding and reconnecting with yourself.</p>
+        <a href="{% url 'property:gallery' %}" class="btn-outline-light mt-8 inline-flex px-6 py-3">View Pool Photos <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="image-frame reveal aspect-[4/3]">
+        {% if gallery_preview|length > 3 %}
+          <img src="{{ gallery_preview.3.image.url }}" alt="Infinity Pool" loading="lazy">
+        {% else %}
+          <img src="{% static 'img/hero-placeholder.jpg' %}" alt="Infinity Pool">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Experiences Section -->
+<section class="section section-alt">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Premium Experiences</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Unforgettable Moments</h2>
+      <p class="mt-4 text-ink/70 max-w-2xl mx-auto">Curated experiences designed to elevate your stay and create lasting memories in our tropical paradise.</p>
+    </div>
+
+    <div class="experiences-grid">
+      <!-- Woodfire Pizza Experience -->
+      <div class="experience-card reveal">
+        <div class="experience-icon">🍕</div>
+        <h3>Woodfire Pizza Experience</h3>
+        <p>Gather around our authentic woodfire pizza oven for an evening of fresh, artisanal pizzas, great company, and stunning sunset views over the gardens.</p>
+        <a href="{% url 'bookings_public:inquire' %}" class="btn-outline-dark">Learn More</a>
+      </div>
+
+      <!-- Fire Pit Experience -->
+      <div class="experience-card reveal">
+        <div class="experience-icon">🔥</div>
+        <h3>Fire Pit Experience</h3>
+        <p>Connect with nature and loved ones around our cozy fire pit. Perfect for stargazing, storytelling, and enjoying the sounds of the tropical night.</p>
+        <a href="{% url 'bookings_public:inquire' %}" class="btn-outline-dark">Learn More</a>
+      </div>
+
+      <!-- Yoga in Nature -->
+      <div class="experience-card reveal">
+        <div class="experience-icon">🧘</div>
+        <h3>Yoga in Nature</h3>
+        <p>Start your day with guided yoga sessions in our serene garden setting. Energize your body and calm your mind surrounded by tropical greenery.</p>
+        <a href="{% url 'bookings_public:inquire' %}" class="btn-outline-dark">Learn More</a>
+      </div>
+
+      <!-- Tea Plantation Walk -->
+      <div class="experience-card reveal">
+        <div class="experience-icon">🍃</div>
+        <h3>Tea Plantation Walk</h3>
+        <p>Explore the lush tea plantations surrounding our villa. Learn about local tea cultivation and enjoy a tasting session of premium Ceylon tea.</p>
+        <a href="{% url 'bookings_public:inquire' %}" class="btn-outline-dark">Learn More</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Enhanced Location Section -->
+<section class="section location-section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+      <div class="location-content">
+        <h2 class="text-3xl font-bold md:text-4xl mb-6">Find Your Paradise</h2>
+        <div class="mt-6">
+          <div class="flex items-start gap-4 mb-6">
+            <div class="location-icon"><i class="bi bi-geo-alt"></i></div>
+            <div>
+              <h3>{{ property.address|default:"Galle, Sri Lanka" }}</h3>
+              <p>Nestled in the heart of Sri Lanka's tea country, a 15-minute drive from Galle's historic Old Town</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 mb-6">
+            <div class="location-icon"><i class="bi bi-airplane"></i></div>
+            <div>
+              <h3>Easy Access</h3>
+              <p>Conveniently located just 2 hours from Colombo International Airport with private transfers available</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="location-icon"><i class="bi bi-compass"></i></div>
+            <div>
+              <h3>Explore Nearby</h3>
+              <p>Close to pristine beaches, wildlife sanctuaries, cultural landmarks, and local markets</p>
+            </div>
+          </div>
+        </div>
+        {% if property.google_maps_url %}<a href="{{ property.google_maps_url }}" target="_blank" rel="noopener" class="btn-outline-light mt-8 inline-flex px-6 py-3"><i class="bi bi-signpost-2"></i> Get Directions</a>{% endif %}
+      </div>
+      {% if property.google_maps_embed_url %}
+      <div class="aspect-[4/3] overflow-hidden rounded-lg shadow-lg">
+        <iframe class="h-full w-full" src="{{ property.google_maps_embed_url }}" allowfullscreen loading="lazy" title="Villa location"></iframe>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
       <p class="mt-3 text-ink/70">{{ property.address }}</p>
       {% if property.google_maps_url %}<a href="{{ property.google_maps_url }}" target="_blank" rel="noopener" class="btn-outline-dark mt-6"><i class="bi bi-signpost-2"></i> Get Directions</a>{% endif %}
     </div>
@@ -277,11 +377,12 @@
 </div>
 {% endif %}
 
-<section class="bg-forest-dark py-20 text-center text-white">
-  <div class="mx-auto max-w-2xl px-6 lg:px-8">
-    <h2 class="font-display text-3xl font-bold md:text-4xl">Ready for Your Escape?</h2>
-    <p class="mt-3 text-white/70">Book directly with us and enjoy the best rates — no commission, no middleman.</p>
-    <a href="{% url 'bookings_public:inquire' %}" class="btn-primary mt-8 inline-flex">Check Availability</a>
+<!-- Premium Final CTA Section -->
+<section class="final-cta-section">
+  <div class="final-cta-content">
+    <h2>Your Private Escape is Waiting</h2>
+    <p>Experience luxury living in harmony with nature. Book directly with us and enjoy exclusive rates with personalized service.</p>
+    <a href="{% url 'bookings_public:inquire' %}" class="btn-primary final-cta-btn mt-8 inline-flex">Check Availability</a>
   </div>
 </section>
 {% endblock %}
