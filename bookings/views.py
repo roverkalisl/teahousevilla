@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
-from property.models import Media, Price, Property
+from property.models import Media, Price, Property, Testimonial
 
 from .forms import AdminLoginForm, BookingInquiryForm
 from .models import AvailabilityBlock, BookingInquiry, BookingNotification, OTAAvailabilitySyncStatus
@@ -316,3 +316,153 @@ def sync_ota(request, source):
         sync_ota_source(site, source)
         messages.success(request, f"{source.replace('_', ' ').title()} availability sync completed.")
     return redirect("bookings:settings")
+
+
+# ============================================================================
+# GUEST REVIEWS MANAGEMENT
+# ============================================================================
+
+@_staff_required
+def manage_reviews(request):
+    """List and manage guest reviews."""
+    site = Property.objects.first()
+    if not site:
+        testimonials = Testimonial.objects.none()
+    else:
+        testimonials = site.testimonials.all()
+
+    # Filtering
+    source_filter = request.GET.get("source", "").strip()
+    rating_filter = request.GET.get("rating", "").strip()
+    active_filter = request.GET.get("active", "").strip()
+    query = request.GET.get("q", "").strip()
+
+    if source_filter:
+        testimonials = testimonials.filter(source=source_filter)
+    if rating_filter:
+        try:
+            testimonials = testimonials.filter(rating=int(rating_filter))
+        except (ValueError, TypeError):
+            rating_filter = ""
+    if active_filter == "active":
+        testimonials = testimonials.filter(active=True)
+    elif active_filter == "inactive":
+        testimonials = testimonials.filter(active=False)
+    if query:
+        testimonials = testimonials.filter(
+            Q(guest_name__icontains=query) | Q(review_text__icontains=query)
+        )
+
+    # Ordering
+    order = request.GET.get("order", "-id")
+    testimonials = testimonials.order_by(order)
+
+    # Pagination
+    page = Paginator(testimonials, 10).get_page(request.GET.get("page"))
+
+    context = {
+        "reviews": page,
+        "source_filter": source_filter,
+        "rating_filter": rating_filter,
+        "active_filter": active_filter,
+        "query": query,
+        "source_choices": Testimonial.SOURCE_CHOICES,
+        "rating_choices": Testimonial.RATING_CHOICES,
+    }
+    return render(request, "admin_dashboard/reviews_list.html", context)
+
+
+@_staff_required
+def add_review(request):
+    """Add a new guest review manually."""
+    site = Property.objects.first()
+    if not site:
+        messages.error(request, "Property not configured yet.")
+        return redirect("bookings:manage_reviews")
+
+    if request.method == "POST":
+        try:
+            review = Testimonial(villa=site)
+            review.guest_name = request.POST.get("guest_name", "").strip()
+            review.rating = int(request.POST.get("rating", 5))
+            review.review_text = request.POST.get("review_text", "").strip()
+            review.source = request.POST.get("source", Testimonial.GOOGLE)
+            review.stay_date = request.POST.get("stay_date") or None
+            review.active = request.POST.get("active") == "on"
+            review.display_order = int(request.POST.get("display_order", 0))
+
+            if request.FILES.get("guest_photo"):
+                review.guest_photo = request.FILES.get("guest_photo")
+
+            review.full_clean()
+            review.save()
+            messages.success(request, f"Review from {review.guest_name} added successfully.")
+            return redirect("bookings:manage_reviews")
+        except (ValueError, ValidationError) as e:
+            messages.error(request, f"Error adding review: {e}")
+
+    context = {
+        "source_choices": Testimonial.SOURCE_CHOICES,
+        "rating_choices": Testimonial.RATING_CHOICES,
+    }
+    return render(request, "admin_dashboard/review_form.html", context)
+
+
+@_staff_required
+def edit_review(request, pk):
+    """Edit an existing guest review."""
+    review = get_object_or_404(Testimonial, pk=pk)
+
+    if request.method == "POST":
+        try:
+            review.guest_name = request.POST.get("guest_name", "").strip()
+            review.rating = int(request.POST.get("rating", 5))
+            review.review_text = request.POST.get("review_text", "").strip()
+            review.source = request.POST.get("source", Testimonial.GOOGLE)
+            review.stay_date = request.POST.get("stay_date") or None
+            review.active = request.POST.get("active") == "on"
+            review.display_order = int(request.POST.get("display_order", 0))
+
+            if request.FILES.get("guest_photo"):
+                review.guest_photo = request.FILES.get("guest_photo")
+
+            review.full_clean()
+            review.save()
+            messages.success(request, f"Review from {review.guest_name} updated successfully.")
+            return redirect("bookings:manage_reviews")
+        except (ValueError, ValidationError) as e:
+            messages.error(request, f"Error updating review: {e}")
+
+    context = {
+        "review": review,
+        "source_choices": Testimonial.SOURCE_CHOICES,
+        "rating_choices": Testimonial.RATING_CHOICES,
+    }
+    return render(request, "admin_dashboard/review_form.html", context)
+
+
+@_staff_required
+def delete_review(request, pk):
+    """Delete a guest review."""
+    if request.method != "POST":
+        return redirect("bookings:manage_reviews")
+
+    review = get_object_or_404(Testimonial, pk=pk)
+    guest_name = review.guest_name
+    review.delete()
+    messages.success(request, f"Review from {guest_name} deleted successfully.")
+    return redirect("bookings:manage_reviews")
+
+
+@_staff_required
+def toggle_review_active(request, pk):
+    """Toggle a review's active status."""
+    if request.method != "POST":
+        return redirect("bookings:manage_reviews")
+
+    review = get_object_or_404(Testimonial, pk=pk)
+    review.active = not review.active
+    review.save(update_fields=("active",))
+    status = "activated" if review.active else "deactivated"
+    messages.success(request, f"Review from {review.guest_name} {status}.")
+    return redirect("bookings:manage_reviews")

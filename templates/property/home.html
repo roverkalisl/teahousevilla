@@ -210,6 +210,73 @@
   </div>
 </section>
 
+{% if featured_reviews %}
+<section class="section section-alt guest-reviews-section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Trusted by Our Guests</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">What Our Guests Say</h2>
+    </div>
+
+    <!-- Review Score Card -->
+    <div class="review-score-card mb-12">
+      <div class="text-center">
+        <div class="review-stars-display" aria-label="{{ average_rating }} out of 5 stars">
+          {% for i in "12345" %}
+            {% if i|add:0 <= average_rating %}★{% elif i|add:-0.5 == average_rating|add:0 %}½{% else %}☆{% endif %}
+          {% endfor %}
+        </div>
+        <p class="review-rating-text">{{ average_rating }} <span>/ 5</span></p>
+        <p class="review-count-text">Based on {{ all_reviews_count }} Guest Review{{ all_reviews_count|pluralize }}</p>
+      </div>
+    </div>
+
+    <!-- Review Cards Grid -->
+    <div class="grid gap-6 md:grid-cols-3 mb-10">
+      {% for review in featured_reviews %}
+      <div class="review-card reveal card p-6">
+        <div class="text-gold review-stars">
+          {% for _ in review.filled_stars %}★{% endfor %}{% for _ in review.empty_stars %}☆{% endfor %}
+        </div>
+        <p class="mt-4 text-sm leading-relaxed text-ink/75">&ldquo;{{ review.review_text|truncatewords:30 }}&rdquo;</p>
+        <div class="mt-5 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            {% if review.guest_photo %}<img src="{{ review.guest_photo.url }}" alt="{{ review.guest_name }}" class="h-8 w-8 rounded-full object-cover">{% endif %}
+            <div>
+              <p class="text-sm font-semibold text-forest">{{ review.guest_name }}</p>
+              <p class="text-xs text-ink/50">{{ review.get_source_display }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- View More Reviews Button -->
+    {% if all_reviews_count > 3 %}
+    <div class="text-center">
+      <button id="viewMoreReviewsBtn" class="btn-outline-dark" data-total-reviews="{{ all_reviews_count }}">
+        View More Reviews ({{ all_reviews_count }})
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- More Reviews Modal -->
+<div id="moreReviewsModal" class="reviews-modal" style="display:none">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>All Guest Reviews</h3>
+      <button type="button" class="modal-close" id="closeReviewsModal" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="allReviewsContainer">
+      <div class="spinner">Loading reviews...</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <section class="bg-forest-dark py-20 text-center text-white">
   <div class="mx-auto max-w-2xl px-6 lg:px-8">
     <h2 class="font-display text-3xl font-bold md:text-4xl">Ready for Your Escape?</h2>
