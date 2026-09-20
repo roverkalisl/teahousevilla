@@ -1,7 +1,19 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Attraction, Facility, Media, Price, Property, Room, Testimonial
+from .models import (
+    Attraction,
+    BedConfiguration,
+    BedType,
+    Facility,
+    Media,
+    Price,
+    Property,
+    PropertyAmenity,
+    PropertyView,
+    Room,
+    Testimonial,
+)
 
 
 def thumb(obj):
@@ -30,6 +42,12 @@ class PriceInline(admin.TabularInline):
     fields = ("price_type", "start_date", "end_date", "amount", "notes", "active")
 
 
+class BedConfigurationInline(admin.TabularInline):
+    model = BedConfiguration
+    extra = 1
+    fields = ("bed_type", "quantity", "display_order", "active")
+
+
 class RoomInline(admin.StackedInline):
     model = Room
     extra = 0
@@ -38,9 +56,22 @@ class RoomInline(admin.StackedInline):
     show_change_link = True
 
 
+class PropertyAmenityInline(admin.TabularInline):
+    model = PropertyAmenity
+    extra = 1
+    fields = ("name", "category", "icon", "description", "display_order", "active")
+    ordering = ("category", "display_order")
+
+
+class PropertyViewInline(admin.TabularInline):
+    model = PropertyView
+    extra = 1
+    fields = ("view_type", "description", "display_order", "active")
+
+
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
-    inlines = [PriceInline, MediaInline]
+    inlines = [PropertyAmenityInline, PropertyViewInline, PriceInline, MediaInline]
     fieldsets = (
         ("Overview", {"fields": ("name", "tagline", "short_description", "full_description", "hero_image", "hero_video_url")}),
         ("Location", {"fields": ("address", "google_maps_url", "google_maps_embed_url")}),
@@ -50,6 +81,11 @@ class PropertyAdmin(admin.ModelAdmin):
         ("Social Media", {"fields": ("facebook_url", "instagram_url", "tiktok_url", "youtube_url")}),
         ("Also Listed On", {"fields": ("airbnb_url", "booking_com_url")}),
         ("Pricing Fallback", {"fields": ("starting_price_override",)}),
+        ("SEO", {
+            "fields": ("seo_title", "seo_description", "seo_canonical_url", "og_image"),
+            "classes": ("collapse",),
+            "description": "Search engine optimization settings. Leave blank for auto-generation.",
+        }),
     )
 
     def has_add_permission(self, request):
@@ -64,7 +100,7 @@ class RoomAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
     filter_horizontal = ("facilities",)
     prepopulated_fields = {"slug": ("name",)}
-    inlines = [MediaInline]
+    inlines = [BedConfigurationInline, MediaInline]
 
     def save_formset(self, request, form, formset, change):
         """Automatically set villa for inline media from the room's villa."""
@@ -114,4 +150,26 @@ class TestimonialAdmin(admin.ModelAdmin):
     list_display = ("guest_name", "rating", "source", "stay_date", "active", "display_order")
     list_filter = ("source", "rating", "active")
     search_fields = ("guest_name", "review_text")
+    list_editable = ("display_order", "active")
+
+
+@admin.register(BedType)
+class BedTypeAdmin(admin.ModelAdmin):
+    list_display = ("name", "description", "active", "display_order")
+    list_filter = ("active",)
+    list_editable = ("display_order", "active")
+
+
+@admin.register(PropertyAmenity)
+class PropertyAmenityAdmin(admin.ModelAdmin):
+    list_display = ("name", "villa", "room", "category", "active", "display_order")
+    list_filter = ("category", "active", "villa")
+    search_fields = ("name", "description")
+    list_editable = ("display_order", "active")
+
+
+@admin.register(PropertyView)
+class PropertyViewAdmin(admin.ModelAdmin):
+    list_display = ("view_type", "villa", "active", "display_order")
+    list_filter = ("view_type", "active", "villa")
     list_editable = ("display_order", "active")

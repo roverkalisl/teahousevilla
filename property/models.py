@@ -98,6 +98,22 @@ class Property(models.Model):
         help_text="Used on the homepage if no active Price rows are configured.",
     )
 
+    # SEO fields
+    seo_title = models.CharField(
+        max_length=60, blank=True, help_text="Used in search results and social media. Leave blank to auto-generate."
+    )
+    seo_description = models.CharField(
+        max_length=160, blank=True, help_text="Used in search results. Leave blank to auto-generate."
+    )
+    seo_canonical_url = models.URLField(
+        blank=True, help_text="Canonical URL. Leave blank for auto-generation."
+    )
+
+    # OG/Social media fields
+    og_image = models.ImageField(
+        upload_to="og/", blank=True, null=True, help_text="Social media preview image. Recommended: 1200x630px"
+    )
+
     class Meta:
         verbose_name = "Property"
         verbose_name_plural = "Property"
@@ -130,6 +146,22 @@ class Property(models.Model):
         except (FileNotFoundError, OSError, ValueError):
             return ""
 
+    @property
+    def og_image_url(self):
+        if not self.og_image:
+            return self.hero_image_url
+        try:
+            self.og_image.open("rb")
+            return self.og_image.url
+        except (FileNotFoundError, OSError, ValueError):
+            return self.hero_image_url
+
+    def get_seo_title(self):
+        return self.seo_title or f"{self.name} Galle | Private {self.bedrooms}-Bedroom Villa"
+
+    def get_seo_description(self):
+        return self.seo_description or self.short_description or f"Stay at {self.name}, a luxurious private villa in Galle, Sri Lanka."
+
 
 class Facility(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -151,13 +183,106 @@ class Facility(models.Model):
         return self.name
 
 
+class PropertyAmenity(models.Model):
+    """Structured amenity system for properties and rooms."""
+
+    CATEGORY_CHOICES = [
+        ("general", "General Amenities"),
+        ("kitchen", "Kitchen"),
+        ("bathroom", "Bathroom"),
+        ("bedroom", "Bedroom"),
+        ("outdoor", "Outdoor"),
+        ("entertainment", "Entertainment"),
+        ("comfort", "Comfort & Convenience"),
+    ]
+
+    villa = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="amenities")
+    room = models.ForeignKey(
+        "Room",
+        on_delete=models.CASCADE,
+        related_name="amenities",
+        null=True,
+        blank=True,
+        help_text="Leave blank for villa-wide amenities.",
+    )
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="general")
+    icon = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Bootstrap Icons class name, e.g. 'bi-wifi'.",
+        default="bi-check2-circle",
+    )
+    description = models.CharField(max_length=255, blank=True)
+    active = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["category", "display_order", "name"]
+        verbose_name_plural = "Amenities"
+
+    def __str__(self):
+        return self.name
+
+
+class PropertyView(models.Model):
+    """Property view types available."""
+
+    CATEGORY_CHOICES = [
+        ("garden", "Garden View"),
+        ("pool", "Pool View"),
+        ("mountain", "Mountain View"),
+        ("countryside", "Countryside View"),
+        ("landmark", "Landmark View"),
+        ("courtyard", "Inner Courtyard View"),
+    ]
+
+    villa = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="views")
+    view_type = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    description = models.CharField(max_length=255, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order"]
+        unique_together = ["villa", "view_type"]
+
+    def __str__(self):
+        return f"{self.get_view_type_display()} - {self.villa.name}"
+
+
+class BedType(models.Model):
+    """Bed type definitions."""
+
+    COMMON_TYPES = [
+        ("single", "Single"),
+        ("queen", "Queen"),
+        ("double", "Double"),
+        ("twin", "Twin"),
+        ("bunk", "Bunk"),
+        ("sofa", "Sofa Bed"),
+        ("crib", "Crib"),
+    ]
+
+    name = models.CharField(max_length=50, choices=COMMON_TYPES, unique=True)
+    description = models.CharField(max_length=200, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order", "name"]
+
+    def __str__(self):
+        return self.get_name_display()
+
+
 class Room(models.Model):
     villa = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="rooms")
     name = models.CharField(max_length=150)
     slug = models.SlugField(max_length=170, unique=True, blank=True)
     description = models.TextField(blank=True)
     capacity = models.PositiveIntegerField(default=2, help_text="Maximum guests in this room.")
-    bed_type = models.CharField(max_length=100, blank=True)
+    bed_type = models.CharField(max_length=100, blank=True, help_text="Legacy field. Use BedConfiguration for detailed configuration.")
     bathroom_info = models.CharField(max_length=150, blank=True)
     has_ac = models.BooleanField(default=True)
     size_sqm = models.PositiveIntegerField(null=True, blank=True)
@@ -190,6 +315,40 @@ class Room(models.Model):
             except (FileNotFoundError, OSError, ValueError):
                 return None
         return candidate if candidate and candidate.image else None
+
+    @property
+    def total_bed_count(self):
+        """Calculate total beds from bed configurations."""
+        return self.bed_configurations.filter(active=True).aggregate(
+            total=models.Sum("quantity")
+        )["total"] or 0
+
+    def get_bed_summary(self):
+        """Return a human-readable bed configuration summary."""
+        configs = self.bed_configurations.filter(active=True).order_by("bed_type__display_order")
+        if not configs.exists():
+            return self.bed_type or "Not specified"
+        return ", ".join([f"{c.quantity}x {c.get_bed_type_display()}" for c in configs])
+
+
+class BedConfiguration(models.Model):
+    """Track individual bed types and quantities per room."""
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="bed_configurations")
+    bed_type = models.ForeignKey(BedType, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField(default=1)
+    display_order = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order", "bed_type__display_order"]
+        unique_together = ["room", "bed_type"]
+
+    def __str__(self):
+        return f"{self.room.name} - {self.quantity}x {self.bed_type.name}"
+
+    def get_bed_type_display(self):
+        return f"{self.bed_type.get_name_display()}"
 
 
 class Media(models.Model):

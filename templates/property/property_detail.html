@@ -1,0 +1,586 @@
+{% extends "base.html" %}
+{% load static markdown_filters %}
+{% block title %}{{ property.get_seo_title }}{% endblock %}
+{% block meta_description %}{{ property.get_seo_description }}{% endblock %}
+
+{% block content %}
+<!-- Hero Gallery -->
+<section class="villa-hero">
+  <div class="absolute inset-0">
+    {% if property.hero_video_embed_url %}
+    <iframe
+      class="pointer-events-none absolute left-1/2 top-1/2 h-[130%] w-[130%] -translate-x-1/2 -translate-y-1/2"
+      src="{{ property.hero_video_embed_url }}?autoplay=1&mute=1&loop=1&controls=0&playlist={{ property.hero_video_embed_url|slice:'-11:' }}"
+      allow="autoplay" title="{{ property.name }}"></iframe>
+    {% elif hero_slides %}
+      {% for slide in hero_slides %}
+      <div class="hero-slide{% if forloop.first %} is-active{% endif %}" style="background-image:url('{{ slide.image.url }}');"></div>
+      {% endfor %}
+    {% else %}
+      <div class="hero-slide is-active" style="background-image:url('{% if property.hero_image %}{{ property.hero_image.url }}{% else %}{% static 'img/hero-placeholder.jpg' %}{% endif %}');"></div>
+    {% endif %}
+  </div>
+
+  <div class="hero-content mx-auto w-full max-w-7xl px-6 lg:px-8">
+    <p class="hero-kicker">{{ property.tagline|default:"A private escape into nature" }}</p>
+    <h1 class="hero-title mt-5">{{ property.name }}</h1>
+
+    <!-- Quick Info Pills -->
+    <div class="mt-6 flex flex-wrap gap-3">
+      <span class="pill text-sm"><i class="bi bi-people text-gold"></i>Sleeps {{ property.max_guests }}</span>
+      <span class="pill text-sm"><i class="bi bi-door-closed text-gold"></i>{{ property.bedrooms }} Bedrooms</span>
+      <span class="pill text-sm"><i class="bi bi-droplet text-gold"></i>{{ property.bathrooms }} Bathrooms</span>
+      {% if property.property_size_sqm %}<span class="pill text-sm"><i class="bi bi-rulers text-gold"></i>{{ property.property_size_sqm }} m²</span>{% endif %}
+    </div>
+
+    <div class="mt-14 flex flex-wrap items-end justify-between gap-8">
+      <p class="hero-meta">{{ property.address|default:"Galle, Sri Lanka" }}</p>
+      <a href="#introduction" class="scroll-cue">Discover more</a>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="introduction" class="section bg-cream">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="grid gap-12 lg:grid-cols-3 lg:items-start">
+      <div class="lg:col-span-2">
+        <p class="eyebrow">About {{ property.name }}</p>
+        <h2 class="editorial-title mt-5">{{ property.tagline|default:"A slower kind of luxury." }}</h2>
+        <div class="editorial-copy mt-7">
+          {{ property.full_description|default:"Nestled in a peaceful setting, this villa combines modern comfort with warm hospitality — the perfect base for a relaxing family getaway or a romantic escape."|markdownify }}
+        </div>
+      </div>
+
+      <!-- Key Property Info -->
+      <div class="lg:col-span-1">
+        <div class="rounded-lg bg-white p-6 shadow-sm border border-forest/10">
+          <h3 class="font-semibold text-forest mb-4">Essential Details</h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex justify-between">
+              <span class="text-ink/65">Max Guests:</span>
+              <span class="font-semibold">{{ property.max_guests }}</span>
+            </li>
+            <li class="flex justify-between">
+              <span class="text-ink/65">Bedrooms:</span>
+              <span class="font-semibold">{{ property.bedrooms }}</span>
+            </li>
+            <li class="flex justify-between">
+              <span class="text-ink/65">Bathrooms:</span>
+              <span class="font-semibold">{{ property.bathrooms }}</span>
+            </li>
+            {% if property.property_size_sqm %}
+            <li class="flex justify-between">
+              <span class="text-ink/65">Size:</span>
+              <span class="font-semibold">{{ property.property_size_sqm }} m²</span>
+            </li>
+            {% endif %}
+            {% if property.check_in_time %}
+            <li class="flex justify-between border-t border-forest/10 pt-3">
+              <span class="text-ink/65">Check-in:</span>
+              <span class="font-semibold">{{ property.check_in_time|time:"g:i A" }}</span>
+            </li>
+            {% endif %}
+            {% if property.check_out_time %}
+            <li class="flex justify-between">
+              <span class="text-ink/65">Check-out:</span>
+              <span class="font-semibold">{{ property.check_out_time|time:"g:i A" }}</span>
+            </li>
+            {% endif %}
+          </ul>
+          <a href="{% url 'bookings_public:inquire' %}" class="btn-primary mt-6 w-full justify-center">Check Availability</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Bedrooms & Sleeping Arrangements -->
+{% if rooms %}
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12">
+      <p class="eyebrow">Accommodation</p>
+      <h2 class="editorial-title mt-5">Bedrooms &amp; Sleeping Arrangements</h2>
+    </div>
+
+    <div class="grid gap-8 md:grid-cols-2">
+      {% for room in rooms %}
+      <div class="rounded-lg border border-forest/10 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <!-- Room Image -->
+        {% if room.cover_image %}
+        <div class="aspect-[4/3] overflow-hidden bg-gray-200">
+          <img src="{{ room.cover_image.image.url }}" alt="{{ room.name }}" class="h-full w-full object-cover">
+        </div>
+        {% else %}
+        <div class="aspect-[4/3] bg-gradient-to-br from-forest/5 to-gold/5"></div>
+        {% endif %}
+
+        <!-- Room Info -->
+        <div class="p-6">
+          <div class="flex items-start justify-between gap-4 mb-3">
+            <div>
+              <h3 class="font-display text-xl text-forest">{{ room.name }}</h3>
+              {% if room.description %}
+              <p class="text-sm text-ink/65 mt-1">{{ room.description|truncatewords:15 }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Room Details Pills -->
+          <div class="flex flex-wrap gap-2 mt-4 mb-4">
+            <span class="pill text-sm"><i class="bi bi-people text-gold"></i>{{ room.capacity }} guests</span>
+            {% if room.bed_configurations.all %}
+              {% for bed_config in room.bed_configurations.all %}
+              <span class="pill text-sm"><i class="bi bi-house-door text-gold"></i>{{ bed_config.quantity }}x {{ bed_config.bed_type.get_name_display }}</span>
+              {% endfor %}
+            {% elif room.bed_type %}
+              <span class="pill text-sm"><i class="bi bi-house-door text-gold"></i>{{ room.bed_type }}</span>
+            {% endif %}
+            {% if room.has_ac %}<span class="pill text-sm"><i class="bi bi-snow text-gold"></i>AC</span>{% endif %}
+            {% if room.size_sqm %}<span class="pill text-sm"><i class="bi bi-rulers text-gold"></i>{{ room.size_sqm }} m²</span>{% endif %}
+          </div>
+
+          <!-- Room Amenities -->
+          {% if room.amenities.all or room.facilities.all %}
+          <div class="mb-4 pt-4 border-t border-forest/10">
+            <p class="text-xs font-semibold text-forest uppercase tracking-wider mb-2">Amenities</p>
+            <div class="flex flex-wrap gap-2">
+              {% for facility in room.facilities.all %}
+              <span class="badge text-xs"><i class="bi {{ facility.icon }}"></i>{{ facility.name }}</span>
+              {% endfor %}
+              {% for amenity in room.amenities.all %}
+              <span class="badge text-xs"><i class="bi {{ amenity.icon }}"></i>{{ amenity.name }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- View Details Button -->
+          <a href="{{ room.get_absolute_url }}" class="btn-outline-dark mt-4 inline-flex px-4 py-2 text-sm">View details <span aria-hidden="true">&#8594;</span></a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Amenities & Facilities -->
+{% if amenities or views %}
+<section class="section bg-forest-dark text-white">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    {% if amenities %}
+    <div class="mb-12">
+      <p class="eyebrow text-gold">Features</p>
+      <h2 class="editorial-title mt-5 text-white">Facilities &amp; Amenities</h2>
+
+      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% regroup amenities by category as amenities_by_category %}
+        {% for category in amenities_by_category %}
+          {% for amenity in category.list %}
+          <div class="feature-card bg-forest-light rounded-lg p-6 reveal">
+            <div class="flex items-start gap-4">
+              <div class="text-2xl text-gold">
+                <i class="bi {{ amenity.icon }}"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white">{{ amenity.name }}</h3>
+                {% if amenity.description %}
+                <p class="text-sm text-white/70 mt-1">{{ amenity.description }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if views %}
+    <div class="border-t border-white/10 pt-12">
+      <p class="eyebrow text-gold">Views</p>
+      <h3 class="text-2xl font-bold text-white mt-5">Stunning Views</h3>
+
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {% for view in views %}
+        <div class="rounded-lg bg-forest-light p-4 reveal text-center">
+          <p class="text-lg font-semibold text-gold">{{ view.get_view_type_display }}</p>
+          {% if view.description %}
+          <p class="text-sm text-white/70 mt-2">{{ view.description }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Kitchen Section -->
+{% if amenities %}
+{% with kitchen_amenities=amenities|dictsort:"category" %}
+{% if "kitchen" in kitchen_amenities %}
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <p class="eyebrow">Dining &amp; Cooking</p>
+    <h2 class="editorial-title mt-5">Private Kitchen</h2>
+    <p class="editorial-copy mt-7 max-w-2xl">
+      The villa features a fully equipped private kitchen with modern appliances and dining facilities, perfect for preparing meals or hosting gatherings.
+    </p>
+
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for amenity in amenities %}
+        {% if amenity.category == "kitchen" %}
+        <div class="flex gap-3 p-3">
+          <div class="text-lg text-gold flex-shrink-0 mt-0.5">
+            <i class="bi {{ amenity.icon }}"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-forest">{{ amenity.name }}</p>
+            {% if amenity.description %}
+            <p class="text-sm text-ink/65 mt-1">{{ amenity.description }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endwith %}
+{% endif %}
+
+<!-- Bathrooms Section -->
+<section class="section bg-cream">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <p class="eyebrow">Comfort</p>
+    <h2 class="editorial-title mt-5">Bathrooms</h2>
+    <p class="editorial-copy mt-7 max-w-2xl">
+      The property features {{ property.bathrooms }} luxurious bathroom{{ property.bathrooms|pluralize }}, equipped with modern fixtures and essential amenities for a comfortable stay.
+    </p>
+
+    {% if amenities %}
+    {% with bathroom_amenities=amenities|dictsort:"category" %}
+    {% if "bathroom" in bathroom_amenities %}
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% for amenity in amenities %}
+        {% if amenity.category == "bathroom" %}
+        <div class="flex gap-3 p-3">
+          <div class="text-lg text-gold flex-shrink-0 mt-0.5">
+            <i class="bi {{ amenity.icon }}"></i>
+          </div>
+          <div>
+            <p class="font-semibold text-forest">{{ amenity.name }}</p>
+            {% if amenity.description %}
+            <p class="text-sm text-ink/65 mt-1">{{ amenity.description }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endif %}
+  </div>
+</section>
+
+<!-- Swimming Pool -->
+{% with pool_media=gallery_by_category.pool %}
+{% if pool_media or property.amenities.filter|dictsort:"name" %}
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+      {% if pool_media %}
+      <div class="aspect-video overflow-hidden rounded-lg">
+        <img src="{{ pool_media.0.image.url }}" alt="Swimming Pool" class="h-full w-full object-cover">
+      </div>
+      {% endif %}
+
+      <div>
+        <p class="eyebrow">Recreation</p>
+        <h2 class="editorial-title mt-5">Swimming Pool</h2>
+        <p class="editorial-copy mt-7">
+          The villa features a stunning private infinity pool surrounded by lush greenery and comfortable seating areas — the perfect retreat for relaxation and recreation.
+        </p>
+
+        <ul class="mt-6 space-y-2 text-sm">
+          <li class="flex gap-3"><i class="bi bi-check-circle text-gold"></i> Private pool access</li>
+          <li class="flex gap-3"><i class="bi bi-check-circle text-gold"></i> Infinity pool design</li>
+          <li class="flex gap-3"><i class="bi bi-check-circle text-gold"></i> Pool loungers</li>
+          <li class="flex gap-3"><i class="bi bi-check-circle text-gold"></i> Poolside dining area</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endwith %}
+
+<!-- Attractions & Activities -->
+{% if attractions %}
+<section class="section bg-cream">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12">
+      <p class="eyebrow">Explore</p>
+      <h2 class="editorial-title mt-5">Nearby Attractions &amp; Activities</h2>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for attraction in attractions %}
+      <div class="rounded-lg border border-forest/10 bg-white p-6 reveal">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-gold">{{ attraction.get_category_display }}</p>
+            <h3 class="font-semibold text-forest mt-2">{{ attraction.name }}</h3>
+          </div>
+          <span class="text-sm font-semibold text-ink/50 flex-shrink-0">{{ attraction.distance_text }}</span>
+        </div>
+        {% if attraction.description %}
+        <p class="text-sm text-ink/65 mt-3">{{ attraction.description }}</p>
+        {% endif %}
+        {% if attraction.google_maps_url %}
+        <a href="{{ attraction.google_maps_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs font-semibold text-gold hover:text-forest mt-4">
+          Get directions <i class="bi bi-box-arrow-up-right"></i>
+        </a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- House Rules & Policies -->
+{% if property.house_rules or property.cancellation_policy %}
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12">
+      <p class="eyebrow">Important</p>
+      <h2 class="editorial-title mt-5">House Rules &amp; Policies</h2>
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-2">
+      {% if property.house_rules %}
+      <div class="rounded-lg bg-cream border border-forest/10 p-6">
+        <h3 class="font-semibold text-forest mb-4">House Rules</h3>
+        <div class="text-sm text-ink/65 space-y-2">
+          {{ property.house_rules|markdownify }}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if property.cancellation_policy %}
+      <div class="rounded-lg bg-cream border border-forest/10 p-6">
+        <h3 class="font-semibold text-forest mb-4">Cancellation Policy</h3>
+        <div class="text-sm text-ink/65 space-y-2">
+          {{ property.cancellation_policy|markdownify }}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if property.check_in_time or property.check_out_time %}
+      <div class="rounded-lg bg-cream border border-forest/10 p-6">
+        <h3 class="font-semibold text-forest mb-4">Check-in &amp; Check-out</h3>
+        <dl class="space-y-3 text-sm">
+          {% if property.check_in_time %}
+          <div>
+            <dt class="text-ink/65">Check-in Time</dt>
+            <dd class="font-semibold text-forest">{{ property.check_in_time|time:"g:i A" }}</dd>
+          </div>
+          {% endif %}
+          {% if property.check_out_time %}
+          <div>
+            <dt class="text-ink/65">Check-out Time</dt>
+            <dd class="font-semibold text-forest">{{ property.check_out_time|time:"g:i A" }}</dd>
+          </div>
+          {% endif %}
+        </dl>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Location & Map -->
+{% if property.google_maps_embed_url or property.address %}
+<section class="section bg-forest-dark text-white">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+      <div>
+        <p class="eyebrow text-gold">Location</p>
+        <h2 class="editorial-title mt-5 text-white">Find Us in Galle</h2>
+        {% if property.address %}
+        <p class="editorial-copy mt-7 text-white/80">{{ property.address }}</p>
+        {% endif %}
+
+        <div class="mt-8 flex flex-wrap gap-4">
+          {% if property.google_maps_url %}
+          <a href="{{ property.google_maps_url }}" target="_blank" rel="noopener" class="btn-primary">Get Directions</a>
+          {% endif %}
+          {% if property.whatsapp_link %}
+          <a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn-outline-light">
+            <i class="bi bi-whatsapp"></i> WhatsApp Us
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if property.google_maps_embed_url %}
+      <div class="aspect-video overflow-hidden rounded-lg">
+        <iframe
+          src="{{ property.google_maps_embed_url }}"
+          width="100%"
+          height="100%"
+          style="border:0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Location map"></iframe>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Gallery -->
+{% with all_images=gallery_by_category.villa|add:gallery_by_category.bedrooms|add:gallery_by_category.bathrooms|add:gallery_by_category.pool|add:gallery_by_category.kitchen|add:gallery_by_category.garden|add:gallery_by_category.exterior %}
+{% if all_images %}
+<section class="section">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Visual Tour</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Gallery</h2>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+      {% for image in all_images|slice:":12" %}
+      <div class="aspect-square overflow-hidden rounded-lg reveal">
+        <a href="{{ image.image.url }}" data-lightbox="gallery" data-title="{{ image.caption }}">
+          <img
+            src="{{ image.image.url }}"
+            alt="{{ image.caption|default:property.name }}"
+            class="h-full w-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+            loading="lazy">
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if all_images|length > 12 %}
+    <div class="mt-8 text-center">
+      <a href="{% url 'property:gallery' %}" class="btn-outline-dark">View Full Gallery</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+{% endwith %}
+
+<!-- Reviews Section -->
+{% if testimonials %}
+<section class="section bg-cream">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mb-12 text-center">
+      <p class="eyebrow">Guest Experiences</p>
+      <h2 class="mt-2 text-3xl font-bold text-forest md:text-4xl">Guest Reviews</h2>
+
+      {% if average_rating %}
+      <div class="mt-6 flex items-center justify-center gap-3">
+        <div class="flex gap-1">
+          {% for star in "12345" %}
+          <i class="bi {% if forloop.counter <= average_rating %}bi-star-fill{% else %}bi-star{% endif %} text-gold text-xl"></i>
+          {% endfor %}
+        </div>
+        <p class="text-lg font-semibold text-forest">{{ average_rating }}/5 <span class="text-sm text-ink/60 font-normal">({{ all_reviews_count }} reviews)</span></p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {% for testimonial in testimonials %}
+      <div class="rounded-lg bg-white border border-forest/10 p-6 reveal">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            {% if testimonial.guest_photo %}
+            <img src="{{ testimonial.guest_photo.url }}" alt="{{ testimonial.guest_name }}" class="h-10 w-10 rounded-full object-cover">
+            {% else %}
+            <div class="h-10 w-10 rounded-full bg-gold/20 flex items-center justify-center">
+              <i class="bi bi-person text-gold"></i>
+            </div>
+            {% endif %}
+          </div>
+          <div class="flex-1">
+            <p class="font-semibold text-forest">{{ testimonial.guest_name }}</p>
+            <p class="text-xs text-ink/60">{{ testimonial.get_source_display }}</p>
+          </div>
+        </div>
+
+        <div class="flex gap-1 mb-3">
+          {% for star in testimonial.filled_stars %}
+          <i class="bi bi-star-fill text-gold text-sm"></i>
+          {% endfor %}
+          {% for star in testimonial.empty_stars %}
+          <i class="bi bi-star text-ink/20 text-sm"></i>
+          {% endfor %}
+        </div>
+
+        <p class="text-sm text-ink/75 line-clamp-3">{{ testimonial.review_text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if all_reviews_count > testimonials|length %}
+    <div class="mt-10 text-center">
+      <a href="{% url 'property:contact' %}" class="btn-outline-dark">See All Reviews</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Final CTA Section -->
+<section class="section bg-forest text-white">
+  <div class="mx-auto max-w-2xl px-6 text-center lg:px-8">
+    <p class="eyebrow text-gold">Ready to Visit?</p>
+    <h2 class="editorial-title mt-5 text-white">Book Your Stay Today</h2>
+    <p class="editorial-copy mt-7 text-white/80">
+      Discover the magic of {{ property.name }}. Check availability and book your perfect getaway now.
+    </p>
+
+    <div class="mt-8 flex flex-wrap justify-center gap-4">
+      <a href="{% url 'bookings_public:inquire' %}" class="btn-primary bg-gold text-forest hover:bg-white px-8 py-4">Check Availability</a>
+      {% if property.whatsapp_link %}
+      <a href="{{ property.whatsapp_link }}" target="_blank" rel="noopener" class="btn-outline-light px-8 py-4">
+        <i class="bi bi-whatsapp"></i> Message Us
+      </a>
+      {% endif %}
+    </div>
+
+    {% if property.phone_number or property.email %}
+    <div class="mt-8 border-t border-white/20 pt-8">
+      <p class="text-sm text-white/60 mb-4">Or reach out directly:</p>
+      <div class="flex flex-wrap justify-center gap-6">
+        {% if property.phone_number %}
+        <a href="tel:{{ property.phone_number }}" class="text-white hover:text-gold transition">
+          <i class="bi bi-telephone"></i> {{ property.phone_number }}
+        </a>
+        {% endif %}
+        {% if property.email %}
+        <a href="mailto:{{ property.email }}" class="text-white hover:text-gold transition">
+          <i class="bi bi-envelope"></i> {{ property.email }}
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

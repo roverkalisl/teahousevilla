@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404, render
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Prefetch
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
-from .models import Attraction, Facility, Media, Property, Room, Testimonial
+from .models import Attraction, Facility, Media, Property, Room, Testimonial, PropertyAmenity, PropertyView, BedConfiguration
 
 
 def _get_property():
@@ -78,6 +78,55 @@ def gallery(request):
 def contact(request):
     context = {"property": _get_property()}
     return render(request, "property/contact.html", context)
+
+
+def property_detail(request):
+    """Comprehensive property detail page."""
+    site = _get_property()
+    if not site:
+        return render(request, "property/property_not_found.html", {"site": site})
+
+    # Prefetch related data for performance
+    bed_configs_prefetch = Prefetch(
+        'bed_configurations',
+        BedConfiguration.objects.filter(active=True).select_related('bed_type').order_by('display_order')
+    )
+    rooms = Room.objects.filter(villa=site, active=True).prefetch_related(
+        bed_configs_prefetch,
+        'media',
+        'facilities'
+    ).order_by('display_order')
+
+    # Calculate review statistics
+    active_reviews = Testimonial.objects.filter(villa=site, active=True)
+    review_stats = active_reviews.aggregate(
+        avg_rating=Avg("rating"),
+        total_count=Count("id")
+    )
+
+    # Categorize media
+    media_by_category = {}
+    for choice_val, choice_label in Media.CATEGORY_CHOICES:
+        media_by_category[choice_val] = Media.objects.filter(
+            villa=site, active=True, media_type=Media.IMAGE, category=choice_val
+        ).order_by('display_order')
+
+    context = {
+        "property": site,
+        "rooms": rooms,
+        "amenities": PropertyAmenity.objects.filter(
+            villa=site, active=True
+        ).order_by('category', 'display_order'),
+        "views": PropertyView.objects.filter(villa=site, active=True).order_by('display_order'),
+        "facilities": Facility.objects.filter(active=True).order_by('display_order'),
+        "gallery_by_category": media_by_category,
+        "attractions": Attraction.objects.filter(villa=site, active=True).order_by('display_order'),
+        "testimonials": active_reviews.order_by('-stay_date', '-id')[:6],
+        "all_reviews_count": review_stats.get("total_count", 0),
+        "average_rating": round(review_stats.get("avg_rating", 0), 1) if review_stats.get("avg_rating") else 0,
+        "hero_slides": Media.objects.filter(active=True, media_type=Media.IMAGE, room__isnull=True)[:6],
+    }
+    return render(request, "property/property_detail.html", context)
 
 
 @require_http_methods(["GET"])
