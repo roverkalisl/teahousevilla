@@ -118,18 +118,26 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(95, 183, 196, .1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, rgba(212, 168, 79, .05) 0%, transparent 50%);
+  /* Dark overlay with strong bottom gradient for readability */
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 40, 35, 0.45) 0%,
+    rgba(15, 60, 50, 0.55) 35%,
+    rgba(31, 77, 58, 0.75) 100%
+  );
   pointer-events: none;
+  z-index: 1;
 }
 
 .villa-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(31, 77, 58, .6), rgba(31, 77, 58, .2) 70%),
-              linear-gradient(0deg, rgba(31, 77, 58, .7), transparent 60%);
+  /* Decorative gradient overlay */
+  background: radial-gradient(circle at 20% 50%, rgba(95, 183, 196, .08) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(212, 168, 79, .04) 0%, transparent 50%);
   pointer-events: none;
+  z-index: 1;
 }
 
 .hero-content {
@@ -156,6 +164,9 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
   line-height: .82;
   font-weight: 600;
   letter-spacing: -.02em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5),
+               0 4px 20px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
 }
 
 .hero-kicker, .eyebrow {
@@ -168,6 +179,13 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
   padding: .5rem 1rem;
   border-bottom: 2px solid var(--villa-gold);
   margin-bottom: 1.5rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.hero-kicker {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  backdrop-filter: blur(4px);
 }
 
 .hero-meta {
@@ -175,6 +193,11 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
   padding-left: 1rem;
   font-size: .75rem;
   letter-spacing: .08em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 2px;
+  backdrop-filter: blur(4px);
 }
 
 .scroll-cue {
@@ -187,6 +210,36 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
   letter-spacing: .18em;
   text-transform: uppercase;
   animation: bounce 2s infinite;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Property info pills - high contrast styling */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  padding: .6rem 1rem;
+  border-radius: 4px;
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all .3s ease;
+}
+
+.pill:hover {
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.pill i {
+  font-size: .95rem;
+  color: var(--villa-gold);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes bounce {
@@ -524,11 +577,36 @@ h1, h2, h3, h4 { font-family: var(--villa-display); font-weight: 500; letter-spa
 .booking-panel .field-label { color: rgba(255,255,255,.72); }
 .booking-panel .input-field:focus { border-color: var(--villa-brass); }
 
+/* Badge styling for amenities and labels */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: rgba(31, 77, 58, 0.2);
+  color: var(--villa-forest);
+  padding: .4rem .8rem;
+  border-radius: 3px;
+  font-size: .75rem;
+  font-weight: 600;
+  border: 1px solid var(--villa-line);
+  transition: all .2s ease;
+}
+
+.badge:hover {
+  background: rgba(31, 77, 58, 0.3);
+  border-color: var(--villa-forest);
+}
+
+.badge i {
+  font-size: .85rem;
+}
+
 @media (max-width: 640px) {
   .hero-content { padding-bottom: 5rem; }
   .hero-title { font-size: clamp(3.4rem, 18vw, 5rem); }
   .feature-card { min-height: 17rem; }
   .review-score { border-left: 0; border-top: 1px solid var(--villa-line); padding-left: 0; padding-top: 2rem; width: 100%; }
+  .pill { font-size: .75rem; padding: .5rem .8rem; }
 }
 /* ============================================================================
    GUEST REVIEWS SECTION
