@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}{{ site_property.name|default:"Villa" }}{% endblock %}</title>
 <meta name="description" content="{% block meta_description %}{{ site_property.short_description|default:"A beautiful private villa retreat." }}{% endblock %}">
-
-<meta property="og:title" content="{% block og_title %}{{ site_property.name|default:"Villa" }}{% endblock %}">
-<meta property="og:description" content="{{ site_property.short_description }}">
+<link rel="canonical" href="https://teahousevillagalle.com{{ request.path }}">
+<meta property="og:title" content="{% block og_title %}{{ site_property.name|default:"Tea House Villa" }}{% endblock %}">
+<meta property="og:description" content="{% block og_description %}{{ site_property.short_description|default:"Discover Tea House Villa in Galle, Sri Lanka." }}{% endblock %}">
 <meta property="og:type" content="website">
-{% if site_property.hero_image %}<meta property="og:image" content="{{ site_property.hero_image.url }}">{% endif %}
+<meta property="og:url" content="https://teahousevillagalle.com{{ request.path }}">
+{% if site_property.og_image %}<meta property="og:image" content="{{ site_property.og_image.url }}">{% elif site_property.hero_image %}<meta property="og:image" content="{{ site_property.hero_image.url }}">{% endif %}
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

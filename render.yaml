@@ -20,6 +20,14 @@ services:
         value: teahousevilla.onrender.com,teahousevillagalle.com,www.teahousevillagalle.com
       - key: CSRF_TRUSTED_ORIGINS
         value: https://teahousevilla.onrender.com,https://teahousevillagalle.com,https://www.teahousevillagalle.com
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: CSRF_COOKIE_SECURE
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
       - key: OTA_SYNC_ENABLED
         value: "False"
       - key: OTA_EXPORT_ENABLED

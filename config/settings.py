@@ -14,7 +14,10 @@ env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("SECRET_KEY")
+IS_RENDER = bool(os.environ.get("RENDER_SERVICE_ID"))
 DEBUG = env("DEBUG")
+if IS_RENDER:
+    DEBUG = False
 ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",
     default=[
@@ -25,6 +28,14 @@ ALLOWED_HOSTS = env.list(
         "www.teahousevillagalle.com",
     ],
 )
+if IS_RENDER:
+    for production_host in (
+        "teahousevilla.onrender.com",
+        "teahousevillagalle.com",
+        "www.teahousevillagalle.com",
+    ):
+        if production_host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(production_host)
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[
@@ -32,6 +43,22 @@ CSRF_TRUSTED_ORIGINS = env.list(
         "https://teahousevillagalle.com",
         "https://www.teahousevillagalle.com",
     ],
+)
+if IS_RENDER:
+    for production_origin in (
+        "https://teahousevilla.onrender.com",
+        "https://teahousevillagalle.com",
+        "https://www.teahousevillagalle.com",
+    ):
+        if production_origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(production_origin)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=IS_RENDER)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=IS_RENDER)
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=IS_RENDER)
+SECURE_HSTS_SECONDS = env.int(
+    "SECURE_HSTS_SECONDS",
+    default=31536000 if IS_RENDER else 0,
 )
 
 CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
@@ -49,6 +76,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sitemaps",
     "django.contrib.staticfiles",
     "property.apps.PropertyConfig",
     "bookings.apps.BookingsConfig",

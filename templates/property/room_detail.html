@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{{ room.name }} — {{ property.name|default:"Villa" }}{% endblock %}
-{% block meta_description %}{{ room.description|truncatewords:25 }}{% endblock %}
+{% block meta_description %}{% if room.description %}{{ room.description|truncatewords:25 }}{% else %}View details for {{ room.name }} at {{ property.name|default:"Tea House Villa" }}.{% endif %}{% endblock %}
+{% block og_title %}{{ room.name }} — {{ property.name|default:"Tea House Villa" }}{% endblock %}
+{% block og_description %}{% if room.description %}{{ room.description|truncatewords:25 }}{% else %}View details for {{ room.name }} at {{ property.name|default:"Tea House Villa" }}.{% endif %}{% endblock %}
 
 {% block content %}
 <section class="section">

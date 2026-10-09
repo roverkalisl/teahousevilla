@@ -36,6 +36,16 @@ Visit http://127.0.0.1:8000/ for the site and http://127.0.0.1:8000/admin/ for t
 The custom owner dashboard is available at http://127.0.0.1:8000/admin-login/.
 Sign in with an active Django staff user. OTA status is shown under Dashboard > Settings.
 
+## Render production settings
+
+`render.yaml` configures production with `DEBUG=False`, a generated `SECRET_KEY`,
+the production and Render hostnames, trusted HTTPS origins, HTTPS redirects, secure
+session/CSRF cookies, and HSTS. Django also forces `DEBUG=False` when running as a
+Render service, even if an overridden service variable says otherwise. Keep the
+generated `SECRET_KEY` private and do not enable `DEBUG` in the Render dashboard.
+If changing the custom domain, update `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`
+to match it.
+
 ## OTA availability status configuration
 
 The dashboard stores one `OTAAvailabilitySyncStatus` row per villa and source
@@ -85,6 +95,7 @@ compiled file is committed so the site works without Node on a plain clone/deplo
   off to a prefilled `wa.me` WhatsApp link
 - WhatsApp click-to-chat, Google Maps embed, social links — all sourced from the Property record
 - Responsive, mobile-first layout (Tailwind CSS)
+- Canonical public URLs, Open Graph metadata, `/robots.txt`, and `/sitemap.xml`
 
 ## What's intentionally deferred (later phases per the project spec)
 
@@ -94,4 +105,3 @@ compiled file is committed so the site works without Node on a plain clone/deplo
 - Booking status workflow (pending/confirmed/checked-in/etc.)
 - Dynamic seasonal-pricing admin UX beyond the existing `Price` model
 - Production deployment, PostgreSQL, Cloudinary media storage, SSL, backups
-- sitemap.xml / robots.txt (basic per-page meta title/description is already in place)

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load markdown_filters %}
 {% block title %}About — {{ property.name|default:"Villa" }}{% endblock %}
-{% block meta_description %}{{ property.short_description }}{% endblock %}
+{% block meta_description %}{{ property.short_description|default:"Learn about the villa in Galle, Sri Lanka." }}{% endblock %}
+{% block og_title %}About — {{ property.name|default:"Tea House Villa" }}{% endblock %}
+{% block og_description %}{{ property.short_description|default:"Learn more about Tea House Villa in Galle, Sri Lanka." }}{% endblock %}
 
 {% block content %}
 <section class="section">

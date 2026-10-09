@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load static markdown_filters %}
-{% block title %}{{ property.name|default:"Villa" }} — {{ property.tagline }}{% endblock %}
-{% block meta_description %}{{ property.short_description }}{% endblock %}
+{% block title %}{{ property.seo_title|default:property.name|default:"Tea House Villa in Galle" }}{% endblock %}
+{% block meta_description %}{{ property.seo_description|default:property.short_description|default:"Discover Tea House Villa in Galle, Sri Lanka." }}{% endblock %}
+{% block og_title %}{{ property.seo_title|default:property.name|default:"Tea House Villa in Galle" }}{% endblock %}
+{% block og_description %}{{ property.seo_description|default:property.short_description|default:"Discover Tea House Villa in Galle, Sri Lanka." }}{% endblock %}
 
 {% block content %}
 <!-- Hero -->
@@ -110,23 +112,25 @@
 </section>
 {% endif %}
 
-{% with google_rating="4.6" google_review_count="68" %}
+{% if average_rating and all_reviews_count %}
 <section class="reviews-trust section section-alt">
   <div class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1fr_auto] lg:items-center lg:px-8">
     <div>
-      <p class="eyebrow">Google Reviews</p>
+      <p class="eyebrow">Guest Reviews</p>
       <h2 class="editorial-title mt-4">Loved by our guests.</h2>
       <p class="editorial-copy mt-5 max-w-lg">Read the latest experiences shared by guests who have stayed at {{ property.name|default:"Tea House Villa" }}.</p>
     </div>
     <div class="review-score">
-      <div class="review-stars" aria-label="{{ google_rating }} out of 5 stars">★★★★★</div>
-      <p class="review-rating">{{ google_rating }} <span>/ 5</span></p>
-      <p class="review-count">Based on {{ google_review_count }} Google Reviews</p>
-      {% if property.google_maps_url %}<a href="{{ property.google_maps_url }}" target="_blank" rel="noopener" class="btn-outline-dark mt-6 inline-flex px-6 py-3">Read all reviews on Google <span aria-hidden="true">&#8599;</span></a>{% endif %}
+      <div class="review-stars" aria-label="{{ average_rating }} out of 5 stars">
+        {% for i in "12345" %}{% if i|add:0 <= average_rating %}★{% elif i|add:-0.5 == average_rating|add:0 %}½{% else %}☆{% endif %}{% endfor %}
+      </div>
+      <p class="review-rating">{{ average_rating }} <span>/ 5</span></p>
+      <p class="review-count">Based on {{ all_reviews_count }} guest reviews</p>
+      {% if property.google_maps_url %}<a href="{{ property.google_maps_url }}" target="_blank" rel="noopener" class="btn-outline-dark mt-6 inline-flex px-6 py-3">Find us on Google Maps <span aria-hidden="true">&#8599;</span></a>{% endif %}
     </div>
   </div>
 </section>
-{% endwith %}
+{% endif %}
 
 {% if attractions %}
 <section class="section section-alt">
