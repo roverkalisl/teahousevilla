@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.db import models
 from django.utils import timezone
@@ -240,3 +241,30 @@ class BookingNotification(models.Model):
 
     def __str__(self):
         return f"{self.booking.booking_reference} — {self.notification_type} — {self.message_status}"
+
+    @property
+    def admin_error_message(self):
+        """Render saved Meta error fields without exposing unstructured provider output."""
+        try:
+            response = json.loads(self.provider_response)
+        except (TypeError, json.JSONDecodeError):
+            return "Notification failed. Provider error details are unavailable."
+
+        if not isinstance(response, dict) or not isinstance(response.get("error"), dict):
+            return "Notification failed. Provider error details are unavailable."
+
+        api_error = response["error"]
+        parts = [response.get("user_message") or "Meta rejected the WhatsApp request."]
+        if api_error.get("code") is not None:
+            parts.append(f"Meta error {api_error['code']}")
+        if api_error.get("error_subcode") is not None:
+            parts.append(f"subcode {api_error['error_subcode']}")
+        if api_error.get("message"):
+            parts.append(api_error["message"])
+        if api_error.get("error_user_msg"):
+            parts.append(api_error["error_user_msg"])
+        error_data = api_error.get("error_data")
+        details = error_data.get("details") if isinstance(error_data, dict) else None
+        if details:
+            parts.append(f"Details: {details}")
+        return " — ".join(str(part) for part in parts)

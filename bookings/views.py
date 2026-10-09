@@ -200,8 +200,29 @@ def resend_notification(request, pk):
     if result.message_status == BookingNotification.STATUS_SENT:
         messages.success(request, "WhatsApp notification sent.")
     else:
-        messages.error(request, "WhatsApp notification failed again.")
+        messages.error(request, "WhatsApp notification failed again. See the provider error on this booking.")
     return redirect("bookings:manage_detail", pk=notification.booking_id)
+
+
+@_staff_required
+def test_whatsapp(request):
+    from .whatsapp import WhatsAppProvider, normalize_phone
+    if request.method != "POST":
+        return redirect("bookings:settings")
+    provider = WhatsAppProvider()
+    raw = request.POST.get("phone", "").strip()
+    mode = request.POST.get("mode", "template")
+    ok, info = provider.check_phone_number()
+    lines = [f"Normalized recipient: {normalize_phone(raw) or '(invalid)'}", f"Sender phone check: {'OK' if ok else 'FAILED'} - {info}"]
+    if mode == "text":
+        sent, response, _ = provider.send_text(raw, "Tea House Villa WhatsApp test message.")
+        mode_description = "text (requires an open 24-hour customer-service window)"
+    else:
+        sent, response, _ = provider.send_template(raw)
+        mode_description = "template (hello_world)"
+    lines.append(f"Send ({mode_description}): {'SUCCESS' if sent else 'FAILED'} - {response}")
+    request.session["whatsapp_test_result"] = {"ok": bool(ok and sent), "text": "\n".join(lines)}
+    return redirect("bookings:settings")
 
 
 @_staff_required
@@ -304,7 +325,7 @@ def settings_page(request):
         for source in (OTAAvailabilitySyncStatus.AIRBNB, OTAAvailabilitySyncStatus.BOOKING_COM):
             status, _ = OTAAvailabilitySyncStatus.objects.get_or_create(villa=site, source=source)
             statuses.append(status)
-    return render(request, "admin_dashboard/settings.html", {"ota_statuses": statuses, "whatsapp_configured": bool(settings.WHATSAPP_ACCESS_TOKEN and settings.WHATSAPP_PHONE_NUMBER_ID), "email_configured": bool(settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD), "ota_sync_enabled": settings.OTA_SYNC_ENABLED})
+    return render(request, "admin_dashboard/settings.html", {"whatsapp_test_result": request.session.pop("whatsapp_test_result", None), "ota_statuses": statuses, "whatsapp_configured": bool(settings.WHATSAPP_ACCESS_TOKEN and settings.WHATSAPP_PHONE_NUMBER_ID), "email_configured": bool(settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD), "ota_sync_enabled": settings.OTA_SYNC_ENABLED})
 
 
 @_staff_required

@@ -20,6 +20,7 @@ urlpatterns = [
     path("admin-dashboard/reviews/<int:pk>/delete/", views.delete_review, name="delete_review"),
     path("admin-dashboard/reviews/<int:pk>/toggle/", views.toggle_review_active, name="toggle_review_active"),
     path("admin-dashboard/settings/", views.settings_page, name="settings"),
+    path("admin-dashboard/settings/whatsapp/test/", views.test_whatsapp, name="test_whatsapp"),
     path("admin-dashboard/settings/ota/<str:source>/sync/", views.sync_ota, name="sync_ota"),
     path("manage/", views.manage_bookings, name="manage_list"),
     path("manage/<int:pk>/", views.booking_detail, name="manage_detail"),

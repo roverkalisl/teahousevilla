@@ -1,1 +1,69 @@
-{% extends 'admin_dashboard/base.html' %}{% block title %}Settings{% endblock %}{% block heading %}Settings{% endblock %}{% block content %}<section class="admin-panel"><div class="panel-heading"><h2>Connection status</h2></div><p>WhatsApp provider <span class="badge {% if whatsapp_configured %}confirmed{% else %}pending{% endif %}">{% if whatsapp_configured %}Configured{% else %}Not configured{% endif %}</span></p><p style="margin-top:14px">Email delivery <span class="badge {% if email_configured %}confirmed{% else %}pending{% endif %}">{% if email_configured %}Configured{% else %}Console or default{% endif %}</span></p><p style="color:var(--muted);margin-top:20px">Sensitive credentials are intentionally never displayed. Configure them through the deployment environment.</p></section><section class="admin-panel table-panel"><div class="panel-heading"><h2>OTA availability sync status</h2><span class="badge {% if ota_sync_enabled %}confirmed{% else %}pending{% endif %}">{% if ota_sync_enabled %}Enabled{% else %}Disabled{% endif %}</span></div><table class="admin-table"><thead><tr><th>Villa</th><th>Source</th><th>Last synced at</th><th>Status</th><th>Last error</th><th>Updated at</th><th></th></tr></thead><tbody>{% for status in ota_statuses %}<tr><td>{{ status.villa.name }}</td><td>{{ status.get_source_display }}</td><td>{{ status.last_synced_at|date:'d M Y H:i'|default:'Never' }}</td><td><span class="badge {{ status.status }}">{{ status.get_status_display }}</span></td><td>{{ status.last_error|default:'-' }}</td><td>{{ status.updated_at|date:'d M Y H:i' }}</td><td><form method="post" action="{% url 'bookings:sync_ota' status.source %}">{% csrf_token %}<button class="button secondary" type="submit">Sync now</button></form></td></tr>{% empty %}<tr><td colspan="7">Create a villa record first.</td></tr>{% endfor %}</tbody></table><p style="color:var(--muted);margin-top:20px">The current adapter records sync health. Add official Airbnb or Booking.com iCal/API integration before enabling production synchronization.</p></section>{% endblock %}
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Settings{% endblock %}
+{% block heading %}Settings{% endblock %}
+{% block content %}
+<section class="admin-panel">
+    <div class="panel-heading"><h2>Connection status</h2></div>
+    <p>WhatsApp provider
+        <span class="badge {% if whatsapp_configured %}confirmed{% else %}pending{% endif %}">
+            {% if whatsapp_configured %}Configured{% else %}Not configured{% endif %}
+        </span>
+    </p>
+    <p style="margin-top:14px">Email delivery
+        <span class="badge {% if email_configured %}confirmed{% else %}pending{% endif %}">
+            {% if email_configured %}Configured{% else %}Console or default{% endif %}
+        </span>
+    </p>
+    <form method="post" action="{% url 'bookings:test_whatsapp' %}" style="margin-top:20px">
+        {% csrf_token %}
+        <input name="phone" placeholder="07XXXXXXXX" required>
+        <select name="mode">
+            <option value="template">Template (hello_world)</option>
+            <option value="text">Text (only within the 24-hour service window)</option>
+        </select>
+        <button class="button secondary" type="submit">Test WhatsApp</button>
+    </form>
+    <p style="color:var(--muted);margin-top:14px">
+        Booking confirmations and cancellations require approved Meta templates configured in the deployment environment.
+        Credentials and template names are intentionally never displayed here.
+    </p>
+    {% if whatsapp_test_result %}
+    <pre style="white-space:pre-wrap;margin-top:14px;padding:12px;border:1px solid var(--line)">{{ whatsapp_test_result.text }}</pre>
+    {% endif %}
+    <p style="color:var(--muted);margin-top:20px">Configure WhatsApp credentials through the deployment environment.</p>
+</section>
+<section class="admin-panel table-panel">
+    <div class="panel-heading">
+        <h2>OTA availability sync status</h2>
+        <span class="badge {% if ota_sync_enabled %}confirmed{% else %}pending{% endif %}">
+            {% if ota_sync_enabled %}Enabled{% else %}Disabled{% endif %}
+        </span>
+    </div>
+    <table class="admin-table">
+        <thead>
+            <tr><th>Villa</th><th>Source</th><th>Last synced at</th><th>Status</th><th>Last error</th><th>Updated at</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for status in ota_statuses %}
+            <tr>
+                <td>{{ status.villa.name }}</td>
+                <td>{{ status.get_source_display }}</td>
+                <td>{{ status.last_synced_at|date:'d M Y H:i'|default:'Never' }}</td>
+                <td><span class="badge {{ status.status }}">{{ status.get_status_display }}</span></td>
+                <td>{{ status.last_error|default:'-' }}</td>
+                <td>{{ status.updated_at|date:'d M Y H:i' }}</td>
+                <td>
+                    <form method="post" action="{% url 'bookings:sync_ota' status.source %}">
+                        {% csrf_token %}
+                        <button class="button secondary" type="submit">Sync now</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7">Create a villa record first.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p style="color:var(--muted);margin-top:20px">The current adapter records sync health. Add official Airbnb or Booking.com iCal/API integration before enabling production synchronization.</p>
+</section>
+{% endblock %}

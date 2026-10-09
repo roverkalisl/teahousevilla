@@ -34,7 +34,23 @@ def cancel_booking(booking):
 
 def _send_whatsapp(booking, notification_type, message):
     notification = BookingNotification.objects.create(booking=booking, notification_type=notification_type, recipient=booking.whatsapp_contact_number, message=message)
-    sent, provider_response, sent_at = WhatsAppProvider().send_text(notification.recipient, message)
+    template_setting = {
+        BookingNotification.TYPE_CONFIRMED: "WHATSAPP_BOOKING_CONFIRMED_TEMPLATE",
+        BookingNotification.TYPE_CANCELLED: "WHATSAPP_BOOKING_CANCELLED_TEMPLATE",
+    }[notification_type]
+    template_name = getattr(settings, template_setting, "")
+    template_parameters = (
+        [booking.full_name, booking.booking_reference, booking.check_in.strftime("%d %B %Y"),
+         booking.check_out.strftime("%d %B %Y"), booking.guest_count]
+        if notification_type == BookingNotification.TYPE_CONFIRMED
+        else [booking.full_name, booking.booking_reference]
+    )
+    sent, provider_response, sent_at = WhatsAppProvider().send_template(
+        notification.recipient,
+        name=template_name,
+        language=getattr(settings, "WHATSAPP_TEMPLATE_LANGUAGE", "en_US"),
+        parameters=template_parameters,
+    )
     notification.message_status = BookingNotification.STATUS_SENT if sent else BookingNotification.STATUS_FAILED
     notification.provider_response = provider_response
     notification.sent_at = sent_at

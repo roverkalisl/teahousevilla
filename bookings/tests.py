@@ -3,10 +3,10 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from bookings.models import AvailabilityBlock, BookingInquiry, BookingNotification
-from bookings.services import cancel_booking, confirm_booking, send_booking_confirmation
+from bookings.services import cancel_booking, confirm_booking, send_booking_cancellation, send_booking_confirmation
 from property.models import Property
 
 
@@ -64,6 +64,12 @@ class BookingAvailabilityEngineTests(TestCase):
         cancel_booking(booking)
         self.assertTrue(BookingInquiry.is_date_range_available(self.property, booking.check_in, booking.check_out))
 
+    @override_settings(
+        WHATSAPP_API_URL="https://graph.facebook.com/v26.0",
+        WHATSAPP_ACCESS_TOKEN="",
+        WHATSAPP_PHONE_NUMBER_ID="",
+        WHATSAPP_BOOKING_CONFIRMED_TEMPLATE="",
+    )
     def test_unconfigured_whatsapp_is_logged_as_failed(self):
         booking = BookingInquiry.objects.create(
             full_name="Guest", phone="94770000000", email="guest@example.com",
@@ -71,6 +77,7 @@ class BookingAvailabilityEngineTests(TestCase):
         )
         notification = send_booking_confirmation(booking)
         self.assertEqual(notification.message_status, BookingNotification.STATUS_FAILED)
+        self.assertIn("not configured", notification.admin_error_message)
 
     def test_confirmed_booking_cannot_be_confirmed_again(self):
         booking = BookingInquiry.objects.create(
@@ -81,8 +88,9 @@ class BookingAvailabilityEngineTests(TestCase):
         with self.assertRaisesMessage(ValueError, "Only pending bookings can be confirmed."):
             confirm_booking(booking)
 
-    @patch("bookings.whatsapp.WhatsAppProvider.send_text", return_value=(True, '{"messages": []}', datetime.datetime(2026, 9, 4, tzinfo=datetime.timezone.utc)))
-    def test_successful_whatsapp_is_logged_with_sent_timestamp(self, send_text):
+    @override_settings(WHATSAPP_BOOKING_CONFIRMED_TEMPLATE="booking_confirmed")
+    @patch("bookings.whatsapp.WhatsAppProvider.send_template", return_value=(True, '{"messages": []}', datetime.datetime(2026, 9, 4, tzinfo=datetime.timezone.utc)))
+    def test_successful_whatsapp_is_logged_with_sent_timestamp(self, send_template):
         booking = BookingInquiry.objects.create(
             full_name="Guest", phone="94770000000", email="guest@example.com",
             check_in=datetime.date(2026, 12, 1), check_out=datetime.date(2026, 12, 4),
@@ -90,7 +98,30 @@ class BookingAvailabilityEngineTests(TestCase):
         notification = send_booking_confirmation(booking)
         self.assertEqual(notification.message_status, BookingNotification.STATUS_SENT)
         self.assertIsNotNone(notification.sent_at)
-        send_text.assert_called_once()
+        send_template.assert_called_once_with(
+            booking.whatsapp_contact_number,
+            name="booking_confirmed",
+            language="en_US",
+            parameters=["Guest", booking.booking_reference, "01 December 2026", "04 December 2026", 1],
+        )
+
+    @override_settings(WHATSAPP_BOOKING_CANCELLED_TEMPLATE="booking_cancelled")
+    @patch("bookings.whatsapp.WhatsAppProvider.send_template", return_value=(True, '{"messages": []}', datetime.datetime(2026, 9, 4, tzinfo=datetime.timezone.utc)))
+    def test_cancellation_notification_uses_approved_template(self, send_template):
+        booking = BookingInquiry.objects.create(
+            full_name="Guest", phone="94770000000", email="guest@example.com",
+            check_in=datetime.date(2026, 12, 1), check_out=datetime.date(2026, 12, 4),
+        )
+
+        notification = send_booking_cancellation(booking)
+
+        self.assertEqual(notification.message_status, BookingNotification.STATUS_SENT)
+        send_template.assert_called_once_with(
+            booking.whatsapp_contact_number,
+            name="booking_cancelled",
+            language="en_US",
+            parameters=["Guest", booking.booking_reference],
+        )
 
     def test_airbnb_or_manual_block_makes_dates_unavailable(self):
         AvailabilityBlock.objects.create(
